@@ -1,6 +1,14 @@
 import logo from "../assets/logo/large-logo-black.png";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 function Navbar() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  if (location.pathname === "/signup" || location.pathname === "/login") {
+    return null;
+  }
+
   return (
     <div className="navbar fixed bg-white">
       <div className="navbar-start">
@@ -26,7 +34,9 @@ function Navbar() {
             className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
           >
             <li>
-              <a>Log in</a>
+              <p className="cursor-pointer" onClick={() => navigate("/login")}>
+                Log in
+              </p>
             </li>
             <li>
               <a>Seek</a>
@@ -54,13 +64,28 @@ function Navbar() {
         </div>
       </div>
       <div className="navbar-center">
-        <img className="h-7 md:h-10 object-contain" src={logo} alt="logo" />
+        <button className="btn btn-link">
+          <img
+            className="h-7 md:h-10 object-contain"
+            src={logo}
+            alt="logo"
+            onClick={() => navigate("/")}
+          />
+        </button>
       </div>
-      <div className="navbar-end gap-10">
-        <button className="btn btn-ghost btn-sm normal-case hidden md:inline-block">
+      <div className="navbar-end gap-4">
+        <button
+          className="btn btn-ghost btn-sm normal-case hidden lg:inline-block lg:btn-md"
+          onClick={() => navigate("/login")}
+        >
           Log in
         </button>
-        <button className="btn btn-neutral btn-sm normal-case">Sign up</button>
+        <button
+          className="btn btn-neutral btn-sm normal-case md:btn-md"
+          onClick={() => navigate("/signup")}
+        >
+          Sign up
+        </button>
       </div>
     </div>
   );
