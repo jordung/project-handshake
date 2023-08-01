@@ -1,6 +1,6 @@
 import Container from "../components/Container";
-import hero from "../assets/landing/Life in a city-pana.svg";
-import team from "../assets/landing/Pair.png";
+import hero from "../assets/landing/hero.svg";
+import team from "../assets/landing/team.png";
 import volunteer from "../assets/logo/logo-white.png";
 import footerLogo from "../assets/logo/logo-black.png";
 import jordanAvatar from "../assets/landing/jordan-avatar.png";
@@ -41,7 +41,7 @@ function Landing() {
         </div>
       </div>
       {/* About Us Section */}
-      <div className="mx-4 mt-5 prose prose-p:font-medium flex flex-col md:min-w-full md:mx-0 lg:flex-row md:justify-center md:items-start md:gap-12">
+      <div className="mx-4 mt-5 prose prose-p:font-medium flex flex-col md:min-w-full md:mx-0 md:px-4 lg:flex-row md:justify-center md:items-start md:gap-12">
         <img
           className="object-contain md:w-2/3 md:self-center lg:w-1/3"
           src={team}
@@ -110,34 +110,11 @@ function Landing() {
         </div>
       </div>
       {/* Footer */}
-      <footer className="footer p-10 bg-base-100 text-base-content md:flex md:justify-between md:px-32">
-        <div>
+      <footer className="footer py-2 bg-base-100 text-base-content md:flex md:justify-center">
+        <div className="flex flex-col items-center">
           <img className="h-32" src={footerLogo} alt="Footer Logo" />
-          <p>
-            Handshake Team
-            <br />
-            Connecting people since 2023
-          </p>
-        </div>
-        <div>
-          <span className="footer-title">Services</span>
-          <a className="link link-hover">Branding</a>
-          <a className="link link-hover">Design</a>
-          <a className="link link-hover">Marketing</a>
-          <a className="link link-hover">Advertisement</a>
-        </div>
-        <div>
-          <span className="footer-title">Company</span>
-          <a className="link link-hover">About us</a>
-          <a className="link link-hover">Contact</a>
-          <a className="link link-hover">Careers</a>
-          <a className="link link-hover">Feedback</a>
-        </div>
-        <div>
-          <span className="footer-title">Legal</span>
-          <a className="link link-hover">Terms of use</a>
-          <a className="link link-hover">Privacy policy</a>
-          <a className="link link-hover">Cookie policy</a>
+          <p className="font-medium">Handshake</p>
+          <p>Connecting hands since 2023.</p>
         </div>
       </footer>
     </Container>
