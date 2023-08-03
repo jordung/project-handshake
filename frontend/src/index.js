@@ -7,16 +7,12 @@ import { Auth0Provider } from "@auth0/auth0-react";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  // note: shifted BrowserRouter to wrap around Auth0Provider
   <BrowserRouter>
     <Auth0Provider
-      domain="dev-b2yxvc3olwmau6sq.us.auth0.com"
-      clientId="jSE9rHHcJCycOhcDVGTU5bsxbacFLEh6"
+      domain={process.env.REACT_APP_AUTH0_DOMAIN}
+      clientId={process.env.REACT_APP_AUTH0_CLIENT_ID}
       authorizationParams={{
         redirect_uri: window.location.origin,
-        audience: process.env.REACT_APP_AUDIENCE,
-        scope:
-          "read:current_user update:current_user_metadata openid profile email",
       }}
     >
       <App />
