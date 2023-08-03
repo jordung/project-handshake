@@ -1,5 +1,6 @@
 const cors = require("cors");
 const express = require("express");
+const auth = require("./middlewares/auth");
 require("dotenv").config();
 
 // importing Routers
@@ -55,6 +56,14 @@ app.use(express.json());
 
 // using the routers
 // app.use("/users", userRouter);
+app.use("/", auth);
+
+// ? route handler for testing auth0
+app.get("/", (req, res) => {
+  // only authenticated users will reach this point
+  console.log("user has been authenticated!!!");
+  res.send("user has been authenticated!!!");
+});
 
 app.listen(PORT, () => {
   console.log(`Express app listening on port ${PORT}!`);
