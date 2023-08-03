@@ -5,8 +5,16 @@ import volunteer from "../assets/logo/logo-white.png";
 import footerLogo from "../assets/logo/logo-black.png";
 import jordanAvatar from "../assets/landing/jordan-avatar.png";
 import jaelynAvatar from "../assets/landing/jaelyn-avatar.png";
+import { useAuth0 } from "@auth0/auth0-react";
+import Spinner from "../components/Spinner";
 
 function Landing() {
+  const { isLoading, loginWithRedirect } = useAuth0();
+
+  if (isLoading) {
+    return <Spinner />;
+  }
+
   return (
     <Container>
       {/* Hero Section */}
@@ -19,7 +27,14 @@ function Landing() {
             seeking to change the world with organisations.{" "}
           </p>
           <div className="flex gap-4">
-            <button className="btn btn-primary text-white normal-case">
+            <button
+              className="btn btn-primary text-white normal-case"
+              onClick={() =>
+                loginWithRedirect({
+                  authorizationParams: { screen_hint: "signup" },
+                })
+              }
+            >
               Join us now
             </button>
             <button className="btn btn-neutral normal-case">Talk to us</button>

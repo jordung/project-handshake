@@ -7,7 +7,7 @@ import { useEffect } from "react";
 function Navbar() {
   const navigate = useNavigate();
 
-  const { loginWithRedirect, isAuthenticated, logout, user } = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
 
   return (
     <div>
@@ -79,27 +79,35 @@ function Navbar() {
         </div>
         <div className="navbar-end gap-4">
           {/* ! TO REMOVE LOGOUT */}
-          <button
-            className="btn btn-ghost btn-sm normal-case hidden lg:inline-block lg:btn-md"
-            onClick={() =>
-              logout({ logoutParams: { returnTo: window.location.origin } })
-            }
-          >
-            Log out
-          </button>
-          <button
-            className="btn btn-ghost btn-sm normal-case hidden lg:inline-block lg:btn-md"
-            onClick={() => loginWithRedirect()}
-          >
-            Log in
-          </button>
-
-          <button
-            className="btn btn-neutral btn-sm normal-case md:btn-md"
-            onClick={() => navigate("/signup")}
-          >
-            Sign up
-          </button>
+          {isAuthenticated ? (
+            <button
+              className="btn btn-ghost btn-sm normal-case hidden lg:inline-block lg:btn-md"
+              onClick={() =>
+                logout({ logoutParams: { returnTo: window.location.origin } })
+              }
+            >
+              Log out
+            </button>
+          ) : (
+            <>
+              <button
+                className="btn btn-ghost btn-sm normal-case hidden lg:inline-block lg:btn-md"
+                onClick={() => loginWithRedirect()}
+              >
+                Log in
+              </button>
+              <button
+                className="btn btn-neutral btn-sm normal-case md:btn-md"
+                onClick={() =>
+                  loginWithRedirect({
+                    authorizationParams: { screen_hint: "signup" },
+                  })
+                }
+              >
+                Sign up
+              </button>
+            </>
+          )}
         </div>
       </div>
       <Outlet />
