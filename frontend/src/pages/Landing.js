@@ -1,15 +1,50 @@
 import Container from "../components/Container";
-import hero from "../assets/landing/hero.svg";
-import team from "../assets/landing/team.png";
-import volunteer from "../assets/logo/logo-white.png";
+import heroImg from "../assets/landing/hero.svg";
+import teamImg from "../assets/landing/team.png";
+import volunteerImg from "../assets/logo/logo-white.png";
 import footerLogo from "../assets/logo/logo-black.png";
 import jordanAvatar from "../assets/landing/jordan-avatar.png";
 import jaelynAvatar from "../assets/landing/jaelyn-avatar.png";
 import { useAuth0 } from "@auth0/auth0-react";
 import Spinner from "../components/Spinner";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useRegisterActions } from "kbar";
 
 function Landing() {
-  const { isLoading, loginWithRedirect } = useAuth0();
+  const navigate = useNavigate();
+  const { isLoading, loginWithRedirect, user, isAuthenticated } = useAuth0();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/home");
+    }
+  }, [user, navigate]);
+
+  useRegisterActions(
+    [
+      {
+        id: "login",
+        name: "Login",
+        shortcut: ["i"],
+        keywords: "logging in log",
+        property: "action",
+        perform: () => loginWithRedirect(),
+      },
+      {
+        id: "signup",
+        name: "Sign Up",
+        shortcut: ["s"],
+        keywords: "sign up",
+        property: "action",
+        perform: () =>
+          loginWithRedirect({
+            authorizationParams: { screen_hint: "signup" },
+          }),
+      },
+    ],
+    [!isAuthenticated]
+  );
 
   if (isLoading) {
     return <Spinner />;
@@ -19,7 +54,7 @@ function Landing() {
     <Container>
       {/* Hero Section */}
       <div className="prose prose-h1:font-bold prose-p:font-medium px-4 pt-8 pb-8 bg-base-100 min-w-full flex flex-col md:flex-row-reverse md:justify-center md:items-center">
-        <img className="mb-0 md:w-2/3 lg:w-1/3" src={hero} alt="hero" />
+        <img className="mb-0 md:w-2/3 lg:w-1/3" src={heroImg} alt="hero" />
         <div className="md:w-1/3">
           <h1 className="mb-0">Join hands. Change the world.</h1>
           <p>
@@ -55,11 +90,12 @@ function Landing() {
           </div>
         </div>
       </div>
+
       {/* About Us Section */}
       <div className="mx-4 mt-5 prose prose-p:font-medium flex flex-col md:min-w-full md:mx-0 md:px-4 lg:flex-row md:justify-center md:items-start md:gap-12">
         <img
           className="object-contain md:w-2/3 md:self-center lg:w-1/3"
-          src={team}
+          src={teamImg}
           alt="about us"
         />
         <div className="lg:w-1/3">
@@ -76,7 +112,7 @@ function Landing() {
           <div className="flex items-start gap-2">
             <img
               className="bg-primary h-10 rounded-full mt-0"
-              src={volunteer}
+              src={volunteerImg}
               alt="volunteer icon"
             />
             <div>
@@ -89,6 +125,7 @@ function Landing() {
               </p>
             </div>
           </div>
+
           {/* The Team Section */}
           <h2>The Team</h2>
           <div className="flex items-start">
@@ -124,6 +161,7 @@ function Landing() {
           </div>
         </div>
       </div>
+
       {/* Footer */}
       <footer className="footer py-2 bg-base-100 text-base-content md:flex md:justify-center">
         <div className="flex flex-col items-center">

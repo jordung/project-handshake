@@ -1,17 +1,18 @@
 import logo from "../assets/logo/large-logo-black.png";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Outlet } from "react-router-dom";
-import { useEffect } from "react";
+import { useKBar } from "kbar";
 
 function Navbar() {
   const navigate = useNavigate();
+  const { query } = useKBar();
 
-  const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
 
   return (
     <div>
-      <div className="navbar fixed bg-white">
+      <div className="navbar fixed bg-white z-10">
         <div className="navbar-start">
           <div className="dropdown">
             <label tabIndex={0} className="btn btn-ghost lg:hidden">
@@ -30,18 +31,26 @@ function Navbar() {
                 />
               </svg>
             </label>
+            {/* mobile/tablet view of quicklinks */}
             <ul
               tabIndex={0}
               className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
             >
-              <li>
-                <p
-                  className="cursor-pointer"
-                  onClick={() => navigate("/login")}
-                >
-                  Log in
-                </p>
-              </li>
+              {!isAuthenticated ? (
+                <li>
+                  <p
+                    className="cursor-pointer"
+                    onClick={() => loginWithRedirect()}
+                  >
+                    Log in
+                  </p>
+                </li>
+              ) : (
+                <li>
+                  <p onClick={query.toggle}>Search</p>
+                </li>
+              )}
+
               <li>
                 <a>Seek</a>
               </li>
@@ -51,9 +60,23 @@ function Navbar() {
               <li>
                 <a>About</a>
               </li>
+              {isAuthenticated && (
+                <li>
+                  <a>
+                    <img
+                      className="h-5 w-5 object-cover rounded-full"
+                      src={user.picture}
+                      alt="profile"
+                    />
+                    Profile
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
+
           <div className="hidden lg:flex">
+            {/* desktop view of quicklinks */}
             <ul className="menu menu-horizontal px-1 font-medium">
               <li>
                 <a>Seek</a>
@@ -73,21 +96,42 @@ function Navbar() {
               className="h-7 md:h-10 object-contain"
               src={logo}
               alt="logo"
-              onClick={() => navigate("/")}
+              onClick={() => navigate(isAuthenticated ? "/home" : "/")}
             />
           </button>
         </div>
         <div className="navbar-end gap-4">
-          {/* ! TO REMOVE LOGOUT */}
           {isAuthenticated ? (
-            <button
-              className="btn btn-ghost btn-sm normal-case hidden lg:inline-block lg:btn-md"
-              onClick={() =>
-                logout({ logoutParams: { returnTo: window.location.origin } })
-              }
-            >
-              Log out
-            </button>
+            <>
+              <button
+                className="hidden btn btn-ghost btn-sm normal-case md:h-10 md:inline-flex"
+                onClick={query.toggle}
+              >
+                <p className="text-sm font-medium">Search</p>
+                <div className="flex gap-[0.1rem]">
+                  <kbd className="kbd kbd-sm">⌘</kbd>
+                  <kbd className="kbd kbd-sm">k</kbd>
+                </div>
+              </button>
+
+              <button className="hidden btn btn-ghost btn-sm normal-case md:h-10 md:inline-flex">
+                <img
+                  className="h-6 w-6 rounded-full"
+                  src={user.picture}
+                  alt="display"
+                />
+                <p className="text-sm font-medium">Profile</p>
+              </button>
+
+              <button
+                className="btn btn-neutral btn-sm normal-case md:h-10"
+                onClick={() =>
+                  logout({ logoutParams: { returnTo: window.location.origin } })
+                }
+              >
+                Log out
+              </button>
+            </>
           ) : (
             <>
               <button
@@ -97,7 +141,7 @@ function Navbar() {
                 Log in
               </button>
               <button
-                className="btn btn-neutral btn-sm normal-case md:btn-md"
+                className="btn btn-neutral btn-sm normal-case md:h-10"
                 onClick={() =>
                   loginWithRedirect({
                     authorizationParams: { screen_hint: "signup" },
