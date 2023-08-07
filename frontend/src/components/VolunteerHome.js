@@ -3,8 +3,6 @@ import cardImg from "../assets/home/cardImg.avif";
 import ProjectCard from "./ProjectCard";
 
 function VolunteerHome() {
-  // TODO: fix tablet/desktop view
-
   return (
     <div className="flex flex-col items-center">
       <div className="relative">
@@ -25,7 +23,7 @@ function VolunteerHome() {
         </div>
       </div>
       <div className="md:w-full flex flex-col items-center">
-        <div className="flex flex-col justify-center items-center m-4 prose">
+        <div className="flex flex-col justify-center my-4 mx-8 prose md:text-center">
           <h2 className="mb-0">Ready To Make A Difference?</h2>
           <p className="mt-0 text-sm font-medium">
             Small Acts, Big Impact. Make a Difference Today.
@@ -33,15 +31,67 @@ function VolunteerHome() {
         </div>
 
         {/* Projects Section */}
-        <div className="flex flex-col md:flex-row md:flex-wrap justify-center lg:w-full xl:w-2/3">
-          <ProjectCard cardImg={cardImg} profileImg={cardImg} />
-          <ProjectCard cardImg={cardImg} profileImg={cardImg} />
-          <ProjectCard cardImg={cardImg} profileImg={cardImg} />
-          <ProjectCard cardImg={cardImg} profileImg={cardImg} />
-          <ProjectCard cardImg={cardImg} profileImg={cardImg} />
-          <ProjectCard cardImg={cardImg} profileImg={cardImg} />
-          <ProjectCard cardImg={cardImg} profileImg={cardImg} />
-          <ProjectCard cardImg={cardImg} profileImg={cardImg} />
+        <div className="flex flex-col mx-4 md:flex-row md:flex-wrap md:gap-3 md:justify-center">
+          <ProjectCard
+            projectImg={cardImg}
+            organiserImg={cardImg}
+            projectTitle="Building schools for the less fortunate youths!"
+            projectDate="30/7/2023"
+            projectTarget="youths"
+            currentVolunteerCount="7"
+            requiredVolunteerCount="10"
+            organiserName="YouthsForLife"
+            organiserType="team"
+            projectLikeCount="55"
+          />
+          <ProjectCard
+            projectImg={cardImg}
+            projectTitle="Building schools for the less fortunate"
+            projectDate="30/07/2023"
+            projectTarget="youths"
+            currentVolunteerCount="7"
+            requiredVolunteerCount="10"
+            organiserImg={cardImg}
+            organiserName="YouthsForLife"
+            organiserType="organisation"
+            projectLikeCount="12"
+          />
+          <ProjectCard
+            projectImg={cardImg}
+            projectTitle="Building schools for the less fortunate"
+            projectDate="30/07/2023"
+            projectTarget="youths"
+            currentVolunteerCount="7"
+            requiredVolunteerCount="10"
+            organiserImg={cardImg}
+            organiserName="YouthsForLife"
+            organiserType="organisation"
+            projectLikeCount="12"
+          />
+          <ProjectCard
+            projectImg={cardImg}
+            projectTitle="Building schools for the less fortunate"
+            projectDate="30/07/2023"
+            projectTarget="youths"
+            currentVolunteerCount="7"
+            requiredVolunteerCount="10"
+            organiserImg={cardImg}
+            organiserName="YouthsForLife"
+            organiserType="organisation"
+            projectLikeCount="12"
+          />
+          <ProjectCard
+            projectImg={cardImg}
+            projectTitle="Building schools for the less fortunate"
+            projectDate="30/07/2023"
+            projectTarget="youths"
+            currentVolunteerCount="7"
+            requiredVolunteerCount="10"
+            organiserImg={cardImg}
+            organiserName="YouthsForLife"
+            organiserType="organisation"
+            projectLikeCount="12"
+          />
         </div>
       </div>
     </div>
