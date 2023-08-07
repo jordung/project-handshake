@@ -10,10 +10,11 @@ import Spinner from "../components/Spinner";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRegisterActions } from "kbar";
+import { createUnauthenticatedActions } from "../constants/commandPaletteActions";
 
 function Landing() {
   const navigate = useNavigate();
-  const { isLoading, loginWithRedirect, user, isAuthenticated } = useAuth0();
+  const { isLoading, loginWithRedirect, user } = useAuth0();
 
   useEffect(() => {
     if (user) {
@@ -21,30 +22,9 @@ function Landing() {
     }
   }, [user, navigate]);
 
-  useRegisterActions(
-    [
-      {
-        id: "login",
-        name: "Login",
-        shortcut: ["i"],
-        keywords: "logging in log",
-        property: "action",
-        perform: () => loginWithRedirect(),
-      },
-      {
-        id: "signup",
-        name: "Sign Up",
-        shortcut: ["s"],
-        keywords: "sign up",
-        property: "action",
-        perform: () =>
-          loginWithRedirect({
-            authorizationParams: { screen_hint: "signup" },
-          }),
-      },
-    ],
-    [!isAuthenticated]
-  );
+  const unauthenticatedActions =
+    createUnauthenticatedActions(loginWithRedirect);
+  useRegisterActions(unauthenticatedActions);
 
   if (isLoading) {
     return <Spinner />;
@@ -103,6 +83,7 @@ function Landing() {
             About us
           </p>
           <h2 className="mt-0">Platform For Good</h2>
+
           <p>
             As active technologists, we seek to make the world a better place
             through what we do best - code. And this is the platform that we
@@ -163,11 +144,15 @@ function Landing() {
       </div>
 
       {/* Footer */}
-      <footer className="footer py-2 bg-base-100 text-base-content md:flex md:justify-center">
+      <footer className="footer pb-2 mt-4 bg-base-100 text-base-content md:flex justify-center">
         <div className="flex flex-col items-center">
           <img className="h-32" src={footerLogo} alt="Footer Logo" />
-          <p className="font-medium">Handshake</p>
-          <p>Connecting hands since 2023.</p>
+          <p className="font-medium text-center">
+            Handshake <br />{" "}
+            <span className="font-normal italic">
+              Connecting hands since 2023.
+            </span>
+          </p>
         </div>
       </footer>
     </Container>

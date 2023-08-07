@@ -6,6 +6,7 @@ import Landing from "./pages/Landing";
 import SetProfile from "./pages/SetProfile";
 import Error from "./pages/Error";
 import Home from "./pages/Home";
+import Profile from "./pages/Profile";
 
 import {
   KBarProvider,
@@ -16,7 +17,7 @@ import {
   KBarResults,
   useMatches,
 } from "kbar";
-import { useAuth0 } from "@auth0/auth0-react";
+import CreateProject from "./pages/CreateProject";
 
 function App() {
   const actions = [];
@@ -29,33 +30,33 @@ function App() {
         items={results}
         onRender={({ item, active }) =>
           typeof item === "string" ? (
-            <div className="px-4 pt-4 pb-2 font-medium text-gray-400 uppercase ">
+            <div className="px-3 py-3 font-medium text-gray-400 text-xs ">
               {item}
             </div>
           ) : (
-            <div
-              className={`${
-                active
-                  ? "bg-neutral text-white rounded-lg font-medium"
-                  : "transparent text-gray-500"
-              } 'rounded-lg px-4 py-2 flex items-center cursor-pointer justify-between text-sm `}
-            >
-              <p>{item.name}</p>
-              <div className="flex items-center gap-2">
-                <p
-                  className={`font-medium text-[0.6rem] uppercase ${
-                    active ? "text-secondary" : "text-neutral"
-                  }`}
-                >
-                  {item.property}
-                </p>
-                <kbd
-                  className={`kbd kbd-sm ${
-                    active ? "bg-accent text-neutral" : "bg-neutral text-white"
-                  }`}
-                >
-                  {item.shortcut}
-                </kbd>
+            <div className="pb-[1px]">
+              <div
+                className={`${
+                  active ? "bg-base-100" : "transparent"
+                } px-4 py-2 rounded-lg mx-2 mb-1 flex text-neutral items-center cursor-pointer justify-between text-sm transition-all duration-300`}
+              >
+                <p>{item.name}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-[0.6rem] uppercase text-neutral font-normal">
+                    {item.property}
+                  </p>
+                  {item.shortcut && (
+                    <kbd
+                      className={`kbd kbd-sm transition-all duration-300 ${
+                        active
+                          ? "bg-neutral text-white"
+                          : "bg-secondary text-neutral"
+                      }`}
+                    >
+                      {item.shortcut}
+                    </kbd>
+                  )}
+                </div>
               </div>
             </div>
           )
@@ -68,9 +69,9 @@ function App() {
     <div>
       <KBarProvider actions={actions}>
         <KBarPortal>
-          <KBarPositioner className="p-2 backdrop-blur-sm flex items-center z-20">
-            <KBarAnimator className=" w-full max-w-[600px] overflow-hidden min-h-[40vh] p-2 bg-white rounded-xl shadow-lg">
-              <KBarSearch className="flex px-4 w-full h-10 mb-2 outline-none" />
+          <KBarPositioner className="fixed backdrop-blur-sm flex items-start justify-center w-full inset-0 px-[14vh] py-[16px] box-border z-20">
+            <KBarAnimator className="w-full max-w-[600px] overflow-hidden bg-white rounded-xl shadow-lg">
+              <KBarSearch className="flex px-4 box-border m-0 w-full h-12 mb-3 border-b-base-100 border-b-[1px] text-sm outline-none" />
               <RenderResults />
             </KBarAnimator>
           </KBarPositioner>
@@ -80,6 +81,8 @@ function App() {
           <Route element={<Navbar />}>
             <Route path="/" element={<Landing />} />
             <Route path="/home" element={<Home />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/createProject" element={<CreateProject />} />
           </Route>
 
           {/* Routes without Navbar */}

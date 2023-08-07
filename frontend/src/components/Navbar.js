@@ -3,12 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Outlet } from "react-router-dom";
 import { useKBar } from "kbar";
+import Spinner from "./Spinner";
 
 function Navbar() {
   const navigate = useNavigate();
   const { query } = useKBar();
 
-  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated, user, isLoading } =
+    useAuth0();
+
+  if (isLoading) {
+    return <Spinner />;
+  }
 
   return (
     <div>
@@ -46,47 +52,44 @@ function Navbar() {
                   </p>
                 </li>
               ) : (
-                <li>
-                  <p onClick={query.toggle}>Search</p>
-                </li>
-              )}
-
-              <li>
-                <a>Seek</a>
-              </li>
-              <li>
-                <a>Contribute</a>
-              </li>
-              <li>
-                <a>About</a>
-              </li>
-              {isAuthenticated && (
-                <li>
-                  <a>
-                    <img
-                      className="h-5 w-5 object-cover rounded-full"
-                      src={user.picture}
-                      alt="profile"
-                    />
-                    Profile
-                  </a>
-                </li>
+                <>
+                  <li>
+                    <p onClick={query.toggle}>Search</p>
+                  </li>
+                  <li>
+                    <p>Projects</p>
+                  </li>
+                  <li>
+                    <p>Organisers</p>
+                  </li>
+                  <li onClick={() => navigate("/profile")}>
+                    <div>
+                      <img
+                        className="h-5 w-5 object-cover rounded-full"
+                        src={user.picture}
+                        alt="profile"
+                      />
+                      Profile
+                    </div>
+                  </li>
+                </>
               )}
             </ul>
           </div>
 
           <div className="hidden lg:flex">
             {/* desktop view of quicklinks */}
-            <ul className="menu menu-horizontal px-1 font-medium">
-              <li>
-                <a>Seek</a>
-              </li>
-              <li>
-                <a>Contribute</a>
-              </li>
-              <li>
-                <a>About</a>
-              </li>
+            <ul className="menu menu-horizontal px-1 font-medium gap-4">
+              {isAuthenticated && (
+                <>
+                  <button className="hidden btn btn-ghost btn-sm normal-case md:h-10 md:inline-flex">
+                    <p className="text-sm font-medium">Projects</p>
+                  </button>
+                  <button className="hidden btn btn-ghost btn-sm normal-case md:h-10 md:inline-flex">
+                    <p className="text-sm font-medium">Organisers</p>
+                  </button>
+                </>
+              )}
             </ul>
           </div>
         </div>
@@ -103,18 +106,28 @@ function Navbar() {
         <div className="navbar-end gap-4">
           {isAuthenticated ? (
             <>
+              <button className="hidden btn btn-primary btn-sm normal-case lg:h-10 lg:inline-flex">
+                <p
+                  className="text-sm font-medium"
+                  onClick={() => navigate("/createProject")}
+                >
+                  Create New Project
+                </p>
+              </button>
               <button
-                className="hidden btn btn-ghost btn-sm normal-case md:h-10 md:inline-flex"
+                className="hidden btn btn-ghost btn-sm normal-case lg:h-10 lg:inline-flex"
                 onClick={query.toggle}
               >
-                <p className="text-sm font-medium">Search</p>
                 <div className="flex gap-[0.1rem]">
-                  <kbd className="kbd kbd-sm">⌘</kbd>
-                  <kbd className="kbd kbd-sm">k</kbd>
+                  <kbd className="kbd kbd-sm">⌘ k</kbd>
                 </div>
+                <p className="text-sm font-medium">Search</p>
               </button>
 
-              <button className="hidden btn btn-ghost btn-sm normal-case md:h-10 md:inline-flex">
+              <button
+                className="hidden btn btn-ghost btn-sm normal-case lg:h-10 lg:inline-flex"
+                onClick={() => navigate("/profile")}
+              >
                 <img
                   className="h-6 w-6 rounded-full"
                   src={user.picture}
