@@ -7,13 +7,14 @@ class UsersRouter {
     // this.auth = auth;
   }
   routes() {
-    router.get("/", this.controller.getAllUsers.bind(this.controller));
-    router.get("/:userId", this.controller.getOneUser.bind(this.controller));
+    router.get("/all", this.controller.getAllUsers.bind(this.controller));
+    router.get(
+      "/organisers",
+      this.controller.getAllOrganisers.bind(this.controller)
+    );
+    router.get("/", this.controller.getOneUser.bind(this.controller));
     router.post("/", this.controller.addOneUser.bind(this.controller));
     router.put("/:userId", this.controller.updateOneUser.bind(this.controller));
-
-    // ? Check with Jordan!!!
-    router.get("/usertype", this.controller.getUserType.bind(this.controller));
 
     // TODO: UPDATE DELETE FUNCTION [WIP]
     router.delete(

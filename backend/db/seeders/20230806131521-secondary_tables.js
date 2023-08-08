@@ -45,6 +45,31 @@ module.exports = {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },
+      {
+        usertype_id: 1,
+        name: "Jordan Ang",
+        username: "jordung",
+        email: "jordanayd@gmail.com",
+        phone: "88888888",
+        biography: "I HATE MY MOUSE!",
+        location: "Singapore",
+        profile_url:
+          "https://s.gravatar.com/avatar/ce29faa275702ae57595ad41c62d8a9a?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fjo.png",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      {
+        usertype_id: 1,
+        name: "Jaelyn Teo",
+        username: "jteohn",
+        email: "jteohn@gmail.com",
+        phone: "99999999",
+        biography: "I LOVE MY MOUSE!",
+        location: "Singapore",
+        profile_url: "",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
     ]);
 
     await queryInterface.bulkInsert("organisers", [

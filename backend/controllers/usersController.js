@@ -1,28 +1,39 @@
 const BaseController = require("./baseController");
+const { Op } = require("sequelize");
 
 class UsersController extends BaseController {
-  constructor({ user, usertype, volunteer, organiser }) {
+  constructor({ user, target_comm, volunteer, organiser }) {
     super(user);
 
     this.user = user;
-    this.usertype = usertype;
+    this.target_comm = target_comm;
     this.volunteer = volunteer;
     this.organiser = organiser;
   }
 
-  // TODO: Check w Jordan if we still need the API call for getUserType!
-  async getUserType(req, res) {
+  async getAllOrganisers(req, res) {
     try {
-      let result = await this.usertype.findAll();
+      const organisers = await this.model.findAll({
+        where: {
+          usertypeId: { [Op.or]: [2, 3] },
+        },
+        include: [
+          {
+            model: this.organiser,
+            attributes: ["website"],
+          },
+        ],
+      });
+
       return res.status(200).json({
         success: true,
-        data: result,
-        msg: "User type has been successfully fetched!",
+        data: organisers,
+        msg: "Success: all organisers retrieved!",
       });
     } catch (error) {
       return res.status(400).json({
         error: true,
-        msg: "Encountered an error while retrieving user type.",
+        msg: "Error: unable to retrieve all organisers.",
       });
     }
   }
@@ -30,10 +41,17 @@ class UsersController extends BaseController {
   // TODO: Check if this could be used to redirect users to home page upon signing in!
   // This API call will return 'volunteers' and 'organisers' tables if usertype = 1 and 2,3 respectively.
   async getOneUser(req, res) {
-    const { userId } = req.params;
+    const email = req.query.email;
     try {
-      const user = await this.model.findByPk(userId, {
-        include: [this.volunteer, this.organiser],
+      const user = await this.model.findOne({
+        where: { email: email },
+        include: [
+          {
+            model: this.volunteer,
+            include: { model: this.target_comm, attributes: ["name"] },
+          },
+          this.organiser,
+        ],
       });
 
       // check if user exists, else return error 404 & redirect them to signup/set profile page.
