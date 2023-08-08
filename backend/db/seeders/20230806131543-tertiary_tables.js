@@ -9,6 +9,18 @@ module.exports = {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },
+      {
+        user_id: 4,
+        target_comm_id: 2,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      {
+        user_id: 5,
+        target_comm_id: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
     ]);
     await queryInterface.bulkInsert("projects", [
       {

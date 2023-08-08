@@ -8,11 +8,17 @@ const auth = require("./middlewares/auth");
 const UsersRouter = require("./routers/usersRouter");
 const ProjectsRouter = require("./routers/projectsRouter");
 const ProjectsLikedRouter = require("./routers/projectsLikedRouter");
+const ProjectsRegistrationRouter = require("./routers/projectsRegistrationRouter");
+const VolunteersRouter = require("./routers/volunteersRouters");
+// const OrganisersRouter = require("./routers/organisersRouter");
 
 // importing Controllers
 const UsersController = require("./controllers/usersController");
 const ProjectsController = require("./controllers/projectsController");
 const ProjectsLikedController = require("./controllers/projectsLikedController");
+const ProjectsRegistrationController = require("./controllers/projectsRegistrationController");
+const VolunteersController = require("./controllers/volunteersController");
+// const OrganisersController = require("./controllers/organisersController");
 
 // TODO: update the following to include organiser model
 // importing DB
@@ -26,9 +32,9 @@ const {
   project,
   liked_project,
   volunteer_project,
-  // status,
-  // role,
-  // communication,
+  status,
+  role,
+  communication,
   // comment,
 } = db;
 
@@ -36,14 +42,20 @@ const {
 const usersController = new UsersController({
   user,
   usertype,
+  target_comm,
   volunteer,
   organiser,
 });
 
 const projectsController = new ProjectsController({
   user,
+  target_comm,
   project,
+  volunteer_project,
   liked_project,
+  status,
+  role,
+  communication,
 });
 
 const projectsLikedController = new ProjectsLikedController({
@@ -52,28 +64,51 @@ const projectsLikedController = new ProjectsLikedController({
   liked_project,
 });
 
-// const projectsLikedController = new ProjectsLikedController({
+const projectsRegistrationController = new ProjectsRegistrationController({
+  user,
+  target_comm,
+  project,
+  volunteer_project,
+  liked_project,
+  status,
+});
+
+const volunteersController = new VolunteersController({
+  user,
+  volunteer,
+  organiser,
+  target_comm,
+  project,
+  liked_project,
+  volunteer_project,
+  status,
+  role,
+});
+
+// const organisersController = new OrganisersController({
 //   user,
-//   usertype,
 //   target_comm,
-//   volunteer,
 //   organiser,
 //   project,
-//   liked_project,
 //   volunteer_project,
+//   liked_project,
 //   status,
 //   role,
-//   communication,
-//   comment,
 // });
 
 // TODO: Figure out where to insert 'auth'
 // inittializing Routers
-const userRouter = new UsersRouter(usersController, auth).routes();
+// const userRouter = new UsersRouter(usersController, auth).routes();
+const userRouter = new UsersRouter(usersController).routes();
 const projectRouter = new ProjectsRouter(projectsController).routes();
 const projectLikedRouter = new ProjectsLikedRouter(
   projectsLikedController
 ).routes();
+const projectRegistrationRouter = new ProjectsRegistrationRouter(
+  projectsRegistrationController
+).routes();
+const volunteerRouter = new VolunteersRouter(volunteersController).routes();
+// const organiserRouter = new OrganisersRouter(organisersController).routes();
 
 const PORT = process.env.PORT;
 const app = express();
@@ -82,12 +117,14 @@ const app = express();
 app.use(cors());
 
 app.use(express.json());
-// app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false }));
 
 // using the routers
 app.use("/users", userRouter);
 app.use("/projects", projectRouter);
 app.use("/likes", projectLikedRouter);
+app.use("/register", projectRegistrationRouter);
+app.use("/volunteers", volunteerRouter);
 
 app.listen(PORT, () => {
   console.log(`Express app listening on port ${PORT}!`);
