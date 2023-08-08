@@ -1,4 +1,7 @@
 function ProfileProjectCard(props) {
+  // TODO: onclick project > navigate to project/:id
+  // TODO: onclick organiser > navigate to organiser/:id
+
   return (
     <div className="flex flex-col items-between justify-center gap-2 shadow-lg w-full rounded-xl p-4">
       <div className="flex justify-between">

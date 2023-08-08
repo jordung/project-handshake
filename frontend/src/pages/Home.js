@@ -2,52 +2,50 @@ import { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import Spinner from "../components/Spinner";
 import VolunteerHome from "../components/VolunteerHome";
-import { useRegisterActions } from "kbar";
-import { createAuthenticatedActions } from "../constants/commandPaletteActions";
 import OrganiserHome from "../components/OrganiserHome";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Home() {
   // TODO: Call API to figure out if user is volunteer/organiser and render out accordingly
-
+  const { user } = useAuth0();
   const [pageLoading, setPageLoading] = useState(true);
-  const [isVolunteer, setIsVolunteer] = useState(false); // temporary control for volunteer/organiser homepage
+  const navigate = useNavigate();
+  const [userDetails, setUserDetails] = useState([]);
 
-  const { isAuthenticated, isLoading, logout } = useAuth0();
-
-  let [dynamicActions] = [];
-  if (!isVolunteer) {
-    dynamicActions = [
-      {
-        id: "acreateProject",
-        name: "Create New Project",
-        shortcut: ["c"],
-        keywords: "create project start",
-        property: "action",
-        section: "Actions",
-        perform: () => (window.location.pathname = "createProject"),
-      },
-      {
-        id: "project1",
-        name: "Project1",
-        keywords: "project",
-        property: "page",
-        parent: "bSearchProject",
-        perform: () => console.log("Project chosen!"),
-      },
-    ];
-  }
-  const authenticatedActions = createAuthenticatedActions(
-    logout,
-    dynamicActions
-  );
-
-  useRegisterActions(authenticatedActions);
+  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      setPageLoading(false);
+    const getUserDetails = async () => {
+      const response = await axios.get(
+        `${process.env.REACT_APP_DB_API}/users`,
+        {
+          params: {
+            email: user.email,
+          },
+        }
+      );
+      return response;
+    };
+    getUserDetails()
+      .then((response) => {
+        setUserDetails(response.data.data);
+        setPageLoading(false);
+      })
+      .catch((error) => {
+        if (error.response.status === 404) {
+          navigate("/setprofile");
+        } else {
+          console.log(error);
+        }
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      loginWithRedirect();
     }
-  }, [isAuthenticated]);
+  }, []);
 
   if (pageLoading || isLoading) {
     return <Spinner />;
@@ -55,7 +53,11 @@ function Home() {
 
   return (
     <div className="flex pt-20 justify-center items-center w-screen md:pt-10">
-      {isVolunteer ? <VolunteerHome /> : <OrganiserHome />}
+      {userDetails && userDetails.usertypeId === 1 ? (
+        <VolunteerHome />
+      ) : (
+        <OrganiserHome />
+      )}
     </div>
   );
 }

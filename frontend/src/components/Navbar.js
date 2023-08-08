@@ -1,18 +1,62 @@
 import logo from "../assets/logo/large-logo-black.png";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Outlet } from "react-router-dom";
 import { useKBar } from "kbar";
 import Spinner from "./Spinner";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { query } = useKBar();
+  const [pageLoading, setPageLoading] = useState(true);
+  const [userDetails, setUserDetails] = useState(null);
 
-  const { loginWithRedirect, logout, isAuthenticated, user, isLoading } =
-    useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
 
-  if (isLoading) {
+  // useEffect(() => {
+  //   if (isAuthenticated || location.pathname === "/") {
+  //     setTimeout(() => {
+  //       setPageLoading(false);
+  //     }, 1000);
+  //   }
+  // }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const getUserDetails = async () => {
+        const response = await axios.get(
+          `${process.env.REACT_APP_DB_API}/users`,
+          {
+            params: {
+              email: user.email,
+            },
+          }
+        );
+        return response;
+      };
+      getUserDetails()
+        .then((response) => {
+          setUserDetails(response.data.data);
+          setPageLoading(false);
+        })
+        .catch((error) => {
+          if (error.response.status === 404) {
+            navigate("/setprofile");
+          } else {
+            console.log(error);
+          }
+        });
+    } else {
+      setTimeout(() => {
+        setPageLoading(false);
+      }, 1000);
+    }
+  }, []);
+
+  if (pageLoading) {
     return <Spinner />;
   }
 
@@ -42,6 +86,15 @@ function Navbar() {
               tabIndex={0}
               className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
             >
+              <li>
+                <p onClick={query.toggle}>Search</p>
+              </li>
+              <li>
+                <p onClick={() => navigate("/projects")}>Projects</p>
+              </li>
+              <li>
+                <p onClick={() => navigate("/organisers")}>Organisers</p>
+              </li>
               {!isAuthenticated ? (
                 <li>
                   <p
@@ -53,15 +106,6 @@ function Navbar() {
                 </li>
               ) : (
                 <>
-                  <li>
-                    <p onClick={query.toggle}>Search</p>
-                  </li>
-                  <li>
-                    <p>Projects</p>
-                  </li>
-                  <li>
-                    <p>Organisers</p>
-                  </li>
                   <li onClick={() => navigate("/profile")}>
                     <div>
                       <img
@@ -80,16 +124,18 @@ function Navbar() {
           <div className="hidden lg:flex">
             {/* desktop view of quicklinks */}
             <ul className="menu menu-horizontal px-1 font-medium gap-4">
-              {isAuthenticated && (
-                <>
-                  <button className="hidden btn btn-ghost btn-sm normal-case md:h-10 md:inline-flex">
-                    <p className="text-sm font-medium">Projects</p>
-                  </button>
-                  <button className="hidden btn btn-ghost btn-sm normal-case md:h-10 md:inline-flex">
-                    <p className="text-sm font-medium">Organisers</p>
-                  </button>
-                </>
-              )}
+              <button
+                className="hidden btn btn-ghost btn-sm normal-case lg:h-10 lg:inline-flex"
+                onClick={() => navigate("/projects")}
+              >
+                <p className="text-sm font-medium">Projects</p>
+              </button>
+              <button
+                className="hidden btn btn-ghost btn-sm normal-case lg:h-10 lg:inline-flex"
+                onClick={() => navigate("/organisers")}
+              >
+                <p className="text-sm font-medium">Organisers</p>
+              </button>
             </ul>
           </div>
         </div>
@@ -106,14 +152,17 @@ function Navbar() {
         <div className="navbar-end gap-4">
           {isAuthenticated ? (
             <>
-              <button className="hidden btn btn-primary btn-sm normal-case lg:h-10 lg:inline-flex">
-                <p
-                  className="text-sm font-medium"
-                  onClick={() => navigate("/createProject")}
-                >
-                  Create New Project
-                </p>
-              </button>
+              {userDetails && userDetails.usertypeId !== 1 && (
+                <button className="hidden btn btn-primary btn-sm normal-case lg:h-10 lg:inline-flex">
+                  <p
+                    className="text-sm font-medium"
+                    onClick={() => navigate("/createProject")}
+                  >
+                    Create New Project
+                  </p>
+                </button>
+              )}
+
               <button
                 className="hidden btn btn-ghost btn-sm normal-case lg:h-10 lg:inline-flex"
                 onClick={query.toggle}
@@ -130,7 +179,7 @@ function Navbar() {
               >
                 <img
                   className="h-6 w-6 rounded-full"
-                  src={user.picture}
+                  src={userDetails && userDetails.profileUrl}
                   alt="display"
                 />
                 <p className="text-sm font-medium">Profile</p>
@@ -148,7 +197,7 @@ function Navbar() {
           ) : (
             <>
               <button
-                className="btn btn-ghost btn-sm normal-case hidden lg:inline-block lg:btn-md"
+                className="btn btn-ghost btn-sm normal-case hidden lg:inline-block md:h-10"
                 onClick={() => loginWithRedirect()}
               >
                 Log in
