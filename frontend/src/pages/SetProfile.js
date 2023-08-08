@@ -9,7 +9,6 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebase";
 
 function SetProfile() {
-  // TODO: add in api call to send user profile information
   const navigate = useNavigate();
   const { user, isLoading } = useAuth0();
   const [pageLoading, setPageLoading] = useState(true);
@@ -60,12 +59,12 @@ function SetProfile() {
 
   // when user has typed in location input, show suggestions, else hide suggestions
   useEffect(() => {
-    if (userLocation.length > 0) {
+    if (userLocation.length > 0 && countries.indexOf(userLocation) === -1) {
       setShowCountrySuggestions(true);
     } else {
       setShowCountrySuggestions(false);
     }
-  }, [userLocation]);
+  }, [userLocation, countries]);
 
   // once user has selected location, setUserLocation and hide suggestions
   const handleSelectedCountry = (country) => {
@@ -109,29 +108,47 @@ function SetProfile() {
       );
       uploadBytes(storageRefInstance, profilePictureFile).then((snapshot) => {
         getDownloadURL(storageRefInstance, profilePictureFile.name).then(
-          (url) => {
+          async (url) => {
             console.log(url);
-            console.log({
-              userType: userType,
-              name: name,
-              username: username,
-              location: userLocation,
-              phoneNumber: phoneNumber,
-              profilePicture: url,
-            });
+            try {
+              const response = await axios.post(
+                `${process.env.REACT_APP_DB_API}/users`,
+                {
+                  userType: userType,
+                  name: name,
+                  username: username,
+                  userLocation: userLocation,
+                  phoneNumber: phoneNumber,
+                  profilePicture: url,
+                  email: user.email,
+                }
+              );
+              console.log(response);
+            } catch (error) {
+              console.log(error);
+            }
           }
         );
       });
     } else {
       profilePicture = user.picture || "";
-      console.log({
-        userType: userType,
-        name: name,
-        username: username,
-        location: userLocation,
-        phoneNumber: phoneNumber,
-        profilePicture: profilePicture,
-      });
+      try {
+        const response = await axios.post(
+          `${process.env.REACT_APP_DB_API}/users`,
+          {
+            userType: userType,
+            name: name,
+            username: username,
+            userLocation: userLocation,
+            phoneNumber: phoneNumber,
+            profilePicture: profilePicture,
+            email: user.email,
+          }
+        );
+        console.log(response);
+      } catch (error) {
+        console.log(error);
+      }
     }
     setUserType("");
     setName("");
@@ -139,9 +156,9 @@ function SetProfile() {
     setUserLocation("");
     setPhoneNumber("");
     setProfilePictureFile(null);
-
     setPageLoading(false);
-    navigate("/home");
+
+    navigate("/profile");
   };
 
   // page loading is for our own page (+ countries api loading), isLoading is for Auth0 information
@@ -156,7 +173,7 @@ function SetProfile() {
           formError ? "opacity-100" : "opacity-0"
         }`}
       >
-        <div className="alert alert-error text-white font-medium rounded-lg md:pr-0 text-sm">
+        <div className="alert alert-error text-white font-medium rounded-lg md:pr-0 text-xs">
           <span>Missing form fields</span>
         </div>
       </div>
@@ -199,7 +216,7 @@ function SetProfile() {
             {profilePictureFile && (
               <button
                 type="button"
-                className="btn btn-sm btn-outline normal-case mt-2"
+                className="btn btn-sm btn-outline normal-case font-normal mt-2"
                 onClick={deleteProfilePicture}
               >
                 Delete
@@ -274,7 +291,7 @@ function SetProfile() {
           </div>
           <label className="label-text font-medium mt-4">Phone Number</label>
           <input
-            type="number"
+            type="text"
             placeholder="+6591234567"
             className="input font-medium text-sm mt-1"
             value={phoneNumber}

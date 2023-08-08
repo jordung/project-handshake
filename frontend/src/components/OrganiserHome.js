@@ -4,11 +4,19 @@ import Spinner from "./Spinner";
 import ProjectCard from "./ProjectCard";
 import cardImg from "../assets/home/cardImg.avif";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  formatDateTime,
+  getProjectTargetDisplay,
+  getOrganiserTypeDisplay,
+} from "../constants/formatProjectCard";
 
 function OrganiserHome() {
+  // TODO: Render upcoming projects and past projects using api
   const navigate = useNavigate();
 
   const [pageLoading, setPageLoading] = useState(true);
+  const [projectList, setProjectList] = useState([]);
 
   const { isAuthenticated } = useAuth0();
 
@@ -17,6 +25,18 @@ function OrganiserHome() {
       setPageLoading(false);
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    const getProjects = async () => {
+      const response = await axios.get(
+        `${process.env.REACT_APP_DB_API}/projects`
+      );
+      setProjectList(response.data.data);
+      setPageLoading(false);
+    };
+
+    getProjects();
+  }, []);
 
   if (pageLoading) {
     return <Spinner />;
@@ -43,72 +63,64 @@ function OrganiserHome() {
           Upcoming Projects
         </h6>
         <div className="flex flex-col md:flex-row md:flex-wrap md:gap-3 md:justify-center">
-          <ProjectCard
-            projectImg={cardImg}
-            projectTitle="Building schools for the less fortunate"
-            projectDate="30/07/2023"
-            projectTarget="youths"
-            currentVolunteerCount="7"
-            requiredVolunteerCount="10"
-            organiserImg={cardImg}
-            organiserName="YouthsForLife"
-            organiserType="organisation"
-            projectLikeCount="12"
-          />
-          <ProjectCard
-            projectImg={cardImg}
-            projectTitle="Building schools for the less fortunate"
-            projectDate="30/07/2023"
-            projectTarget="youths"
-            currentVolunteerCount="7"
-            requiredVolunteerCount="10"
-            organiserImg={cardImg}
-            organiserName="YouthsForLife"
-            organiserType="organisation"
-            projectLikeCount="12"
-          />
-          <ProjectCard
-            projectImg={cardImg}
-            projectTitle="Building schools for the less fortunate"
-            projectDate="30/07/2023"
-            projectTarget="youths"
-            currentVolunteerCount="7"
-            requiredVolunteerCount="10"
-            organiserImg={cardImg}
-            organiserName="YouthsForLife"
-            organiserType="organisation"
-            projectLikeCount="12"
-          />
-          <ProjectCard
-            projectImg={cardImg}
-            projectTitle="Building schools for the less fortunate"
-            projectDate="30/07/2023"
-            projectTarget="youths"
-            currentVolunteerCount="7"
-            requiredVolunteerCount="10"
-            organiserImg={cardImg}
-            organiserName="YouthsForLife"
-            organiserType="organisation"
-            projectLikeCount="12"
-          />
-          <ProjectCard
-            projectImg={cardImg}
-            projectTitle="Building schools for the less fortunate"
-            projectDate="30/07/2023"
-            projectTarget="youths"
-            currentVolunteerCount="7"
-            requiredVolunteerCount="10"
-            organiserImg={cardImg}
-            organiserName="YouthsForLife"
-            organiserType="organisation"
-            projectLikeCount="12"
-          />
+          {projectList.length > 0 &&
+            projectList.map((project) => (
+              <ProjectCard
+                key={project.id}
+                projectImg={project.image}
+                projectTitle={project.title}
+                projectDate={formatDateTime(project.startDate, project.endDate)}
+                projectTarget={getProjectTargetDisplay(project.targetCommId)}
+                currentVolunteerCount={project.volunteersCount}
+                requiredVolunteerCount={project.volunteersRequired}
+                organiserImg={project.user.profileUrl}
+                organiserName={project.user.name}
+                organiserType={getOrganiserTypeDisplay(project.user.usertypeId)}
+                projectLikeCount={project.likesCount}
+              />
+            ))}
         </div>
       </div>
       {/* Past Projects Section */}
       <div className="mt-8 flex flex-col items-start justify-center min-w-full md:items-center">
         <h6 className="text-lg font-semibold text-neutral">Past Projects</h6>
         <div className="flex flex-col md:flex-row md:flex-wrap md:gap-3 md:justify-center">
+          <ProjectCard
+            projectImg={cardImg}
+            projectTitle="Building schools for the less fortunate"
+            projectDate="30/07/2023"
+            projectTarget="youths"
+            currentVolunteerCount="7"
+            requiredVolunteerCount="10"
+            organiserImg={cardImg}
+            organiserName="YouthsForLife"
+            organiserType="organisation"
+            projectLikeCount="12"
+          />
+          <ProjectCard
+            projectImg={cardImg}
+            projectTitle="Building schools for the less fortunate"
+            projectDate="30/07/2023"
+            projectTarget="youths"
+            currentVolunteerCount="7"
+            requiredVolunteerCount="10"
+            organiserImg={cardImg}
+            organiserName="YouthsForLife"
+            organiserType="organisation"
+            projectLikeCount="12"
+          />
+          <ProjectCard
+            projectImg={cardImg}
+            projectTitle="Building schools for the less fortunate"
+            projectDate="30/07/2023"
+            projectTarget="youths"
+            currentVolunteerCount="7"
+            requiredVolunteerCount="10"
+            organiserImg={cardImg}
+            organiserName="YouthsForLife"
+            organiserType="organisation"
+            projectLikeCount="12"
+          />
           <ProjectCard
             projectImg={cardImg}
             projectTitle="Building schools for the less fortunate"

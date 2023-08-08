@@ -1,5 +1,5 @@
 import "./App.css";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import Landing from "./pages/Landing";
@@ -7,6 +7,9 @@ import SetProfile from "./pages/SetProfile";
 import Error from "./pages/Error";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
+import Spinner from "./components/Spinner";
+
+import { getProjectTargetDisplay } from "./constants/formatProjectCard";
 
 import {
   KBarProvider,
@@ -18,9 +21,142 @@ import {
   useMatches,
 } from "kbar";
 import CreateProject from "./pages/CreateProject";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import Projects from "./pages/Projects";
+import Organisers from "./pages/Organisers";
+import Project from "./pages/Project";
+import Organiser from "./pages/Organiser";
 
 function App() {
-  const actions = [];
+  const { isAuthenticated, logout, loginWithRedirect, user, isLoading } =
+    useAuth0();
+  const [pageLoading, setPageLoading] = useState(true);
+  const [allProjectsList, setAllProjectsList] = useState([]);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const getProjects = async () => {
+      const response = await axios.get(
+        `${process.env.REACT_APP_DB_API}/projects`
+      );
+      setAllProjectsList(response.data.data);
+    };
+
+    getProjects();
+
+    if (isAuthenticated) {
+      setPageLoading(false);
+    } else {
+      setPageLoading(false);
+    }
+  }, [isAuthenticated, location]);
+
+  const actions = [
+    {
+      id: "ahome",
+      name: "Home",
+      shortcut: ["h"],
+      keywords: "home gohome",
+      property: "page",
+      section: "Pages",
+      perform: () => (window.location.pathname = "home"),
+    },
+    {
+      id: "aprofile",
+      name: "Profile",
+      shortcut: ["p"],
+      keywords: "profile user",
+      property: "page",
+      section: "Pages",
+      perform: () => (window.location.pathname = "profile"),
+    },
+    {
+      id: "aprojects",
+      name: "Projects",
+      shortcut: ["r"],
+      keywords: "project all",
+      property: "page",
+      section: "Pages",
+      perform: () => (window.location.pathname = "projects"),
+    },
+    {
+      id: "aorganisers",
+      name: "Organisers",
+      shortcut: ["g"],
+      keywords: "organise all",
+      property: "page",
+      section: "Pages",
+      perform: () => (window.location.pathname = "organisers"),
+    },
+    // {
+    //   id: "createProject",
+    //   name: "Create Project",
+    //   shortcut: ["c"],
+    //   keywords: "create project new",
+    //   subtitle: "Test",
+    //   property: "action",
+    //   section: "Actions",
+    //   perform: () =>
+    //     !isAuthenticated || userDetails.usertypeId === 1
+    //       ? handleInvalidAction()
+    //       : navigate("/createProject"),
+    // },
+    {
+      id: "alogout",
+      name: "Logout",
+      shortcut: ["o"],
+      keywords: "log out",
+      property: "action",
+      section: "Actions",
+      perform: () =>
+        logout({ logoutParams: { returnTo: window.location.origin } }),
+    },
+    {
+      id: "login",
+      name: "Login",
+      shortcut: ["i"],
+      keywords: "logging in log",
+      property: "action",
+      perform: () => loginWithRedirect(),
+    },
+    {
+      id: "signup",
+      name: "Sign Up",
+      shortcut: ["s"],
+      keywords: "sign up",
+      property: "action",
+      perform: () =>
+        loginWithRedirect({
+          authorizationParams: { screen_hint: "signup" },
+        }),
+    },
+    {
+      id: "bSearchProject",
+      name: "Search Projects...",
+      keywords: "search project",
+      property: "search",
+      section: "Search",
+    },
+    {
+      id: "bSearchOrg",
+      name: "Search Organisers...",
+      keywords: "search project",
+      property: "search",
+      section: "Search",
+    },
+    ...allProjectsList.map((project) => ({
+      id: `c${project.id.toString()}`,
+      name: project.title,
+      keywords: project.title,
+      property: "page",
+      parent: "bSearchProject",
+      section: getProjectTargetDisplay(project.targetCommId),
+      perform: () => console.log(`Project: ${project.title} chosen!`),
+    })),
+  ];
 
   function RenderResults() {
     const { results } = useMatches();
@@ -65,8 +201,12 @@ function App() {
     );
   }
 
+  if (pageLoading || isLoading) {
+    return <Spinner />;
+  }
+
   return (
-    <div>
+    <>
       <KBarProvider actions={actions}>
         <KBarPortal>
           <KBarPositioner className="fixed backdrop-blur-sm flex items-start justify-center w-full inset-0 px-[14vh] py-[16px] box-border z-20">
@@ -82,15 +222,19 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/home" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/createProject" element={<CreateProject />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/organisers" element={<Organisers />} />
+            <Route path="/project/:id" element={<Project />} />
+            <Route path="/organiser/:id" element={<Organiser />} />
           </Route>
 
           {/* Routes without Navbar */}
-          <Route path="/setprofile" element={<SetProfile />} />
+          <Route path="/setProfile" element={<SetProfile />} />
+          <Route path="/createProject" element={<CreateProject />} />
           <Route path="*" element={<Error />} />
         </Routes>
       </KBarProvider>
-    </div>
+    </>
   );
 }
 
