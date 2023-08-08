@@ -9,8 +9,6 @@ import { useAuth0 } from "@auth0/auth0-react";
 import Spinner from "../components/Spinner";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRegisterActions } from "kbar";
-import { createUnauthenticatedActions } from "../constants/commandPaletteActions";
 
 function Landing() {
   const navigate = useNavigate();
@@ -21,10 +19,6 @@ function Landing() {
       navigate("/home");
     }
   }, [user, navigate]);
-
-  const unauthenticatedActions =
-    createUnauthenticatedActions(loginWithRedirect);
-  useRegisterActions(unauthenticatedActions);
 
   if (isLoading) {
     return <Spinner />;

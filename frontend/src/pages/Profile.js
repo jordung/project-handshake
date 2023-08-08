@@ -1,32 +1,61 @@
-import { useRegisterActions } from "kbar";
 import { useAuth0 } from "@auth0/auth0-react";
 import VolunteerProfile from "../components/VolunteerProfile";
-import { createAuthenticatedActions } from "../constants/commandPaletteActions";
+import { useEffect, useState } from "react";
+import Spinner from "../components/Spinner";
+import axios from "axios";
+import OrganiserProfile from "../components/OrganiserProfile";
 
 function Profile() {
   // TODO: organiser profile
-  const { logout } = useAuth0();
+  // TODO: update UI once the rest of the information confirmed
+  const { isAuthenticated, loginWithRedirect, user } = useAuth0();
+  const [pageLoading, setPageLoading] = useState(true);
+  const [userDetails, setUserDetails] = useState([]);
 
-  // ! if need to create dynamic actions
-  //   const projectList = [
-  //     { name: "project1" },
-  //     { name: "project2" },
-  //     { name: "project3" },
-  //   ];
+  useEffect(() => {
+    const getUserDetails = async () => {
+      const response = await axios.get(
+        `${process.env.REACT_APP_DB_API}/users`,
+        {
+          params: {
+            email: user.email,
+          },
+        }
+      );
+      return response;
+    };
+    getUserDetails()
+      .then((response) => {
+        setUserDetails(response.data.data);
+      })
+      .catch((error) => {
+        if (error.status === 404) {
+          console.log("404");
+        }
+      });
+  }, []);
 
-  //   const dynamicActions = projectList.map((project) => ({
-  //     id: project.name,
-  //     name: project.name,
-  //     keywords: "project",
-  //     property: "page",
-  //     perform: () => {
-  //       console.log(`Navigating to ${project.name} page`);
-  //     },
-  //   }));
+  useEffect(() => {
+    if (isAuthenticated) {
+      setPageLoading(false);
+    } else {
+      loginWithRedirect();
+    }
+  }, [isAuthenticated, user, loginWithRedirect]);
 
-  useRegisterActions(createAuthenticatedActions(logout));
+  if (pageLoading) {
+    return <Spinner />;
+  }
 
-  return <VolunteerProfile />;
+  // return VolunteerProfile if userDetail.usertypeId === 1
+  if (userDetails && userDetails.usertypeId === 1) {
+    return <VolunteerProfile userDetails={userDetails} />;
+  } else if (
+    userDetails &&
+    (userDetails.usertypeId === 2 || userDetails.usertypeId === 3)
+  ) {
+    return <OrganiserProfile userDetails={userDetails} />;
+  } // else if userDetail.usertypeId === 2 or 3, return OrganiserProfile
 }
 
 export default Profile;
