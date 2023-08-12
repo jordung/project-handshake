@@ -1,6 +1,5 @@
 const BaseController = require("./baseController");
 
-// TODO: change all to "liked" instead of saved
 class ProjectsController extends BaseController {
   constructor({
     user,
@@ -71,15 +70,11 @@ class ProjectsController extends BaseController {
     }
   }
 
-  // * unregistered volunteers --> can join project
-  // * registered volunteers --> display registration status
-  // * organiser = organiser.id --> display list of volunteers
-
   async getOneProject(req, res) {
     const { projectId } = req.params;
     const userId = req.query.userId;
     try {
-      // for all users: can view project details.
+      // ===== [ALL USERS]: display project details ===== //
       const project = await this.model.findByPk(projectId, {
         include: [
           {
@@ -96,15 +91,33 @@ class ProjectsController extends BaseController {
         where: { projectId: projectId },
       });
 
-      // count the total number of likes the project has received
       const likesCount = await this.liked_project.count({
         where: { projectId: projectId },
       });
 
+      const communications = await this.project.findByPk(projectId, {
+        include: [
+          {
+            model: this.communication,
+          },
+        ],
+        attributes: [],
+      });
+
+      // check if projects exists
       if (!project) {
         return res.status(404).json({
           error: true,
           msg: "Error: project not found.",
+        });
+      }
+
+      // check if userId exists, if no = user is unauthenticated
+      if (!userId) {
+        return res.status(200).json({
+          success: true,
+          data: { ...project.toJSON(), likesCount, volunteersCount },
+          msg: "Success: volunteer is not registered for this project!",
         });
       }
 
@@ -117,7 +130,7 @@ class ProjectsController extends BaseController {
           where: { userId: userId, projectId: projectId },
         });
 
-        // for registered volunteers: display project details + registration status.
+        // ===== [REGISTERED VOLUNTEERS]: display project details + registration status + comms ===== //
         if (alreadyRegistered) {
           const registeredVolunteer = await this.volunteer_project.findByPk(
             userId,
@@ -125,21 +138,16 @@ class ProjectsController extends BaseController {
               include: [
                 {
                   model: this.status,
-                  attributes: ["name"],
+                  attributes: ["id", "name"],
+                },
+                {
+                  model: this.role,
+                  attributes: ["id", "name"],
                 },
               ],
               attributes: [],
             }
           );
-
-          const communications = await this.project.findByPk(projectId, {
-            include: [
-              {
-                model: this.communication,
-              },
-            ],
-            attributes: [],
-          });
 
           return res.status(200).json({
             success: true,
@@ -153,44 +161,54 @@ class ProjectsController extends BaseController {
             msg: "Success: retrieved details of the registered volunteer!",
           });
         } else {
-          // for unregistered volunteers: display project details only.
+          // ===== [UNREGISTERED VOLUNTEERS]: display project details ===== //
           return res.status(200).json({
             success: true,
             data: { ...project.toJSON(), likesCount, volunteersCount },
             msg: "Success: volunteer is not registered for this project!",
           });
         }
-        // if usertype != 1, user = organiser
       } else {
-        // for organisers: display project details + registered volunteers.
-        const projectVolunteers = await this.volunteer_project.findAll({
-          where: { projectId: projectId },
-          include: [
-            {
-              model: this.user,
-            },
-            {
-              model: this.status,
-              attributes: ["name"],
-            },
-            {
-              model: this.role,
-              attributes: ["name"],
-            },
-          ],
-          attributes: [],
-        });
+        // if usertype != 1, user = organiser; check if organiser is the project organiser
+        if (project.userId === parseInt(userId)) {
+          // ===== [PROJECT ORGANISER]: display project details + registered volunteers (statuses & roles) + comms ===== //
+          const projectVolunteers = await this.volunteer_project.findAll({
+            where: { projectId: projectId },
+            include: [
+              {
+                model: this.user,
+              },
+              {
+                model: this.status,
+                attributes: ["id", "name"],
+              },
+              {
+                model: this.role,
+                attributes: ["id", "name"],
+              },
+            ],
+            attributes: [],
+          });
 
-        return res.status(200).json({
-          success: true,
-          data: {
-            ...project.toJSON(),
-            likesCount,
-            volunteersCount,
-            projectVolunteers,
-          },
-          msg: "Success: retrieved information of all registered volunteers, including registration statuses and project roles.",
-        });
+          return res.status(200).json({
+            success: true,
+            data: {
+              ...project.toJSON(),
+              likesCount,
+              volunteersCount,
+              projectVolunteers,
+              communications,
+            },
+            msg: "Success: retrieved information of all registered volunteers, including registration statuses and project roles.",
+          });
+        } else {
+          // ===== [ALL OTHER ORGANISERS]: display project details ===== //
+          return res.status(200).json({
+            success: true,
+            data: { ...project.toJSON(), likesCount, volunteersCount },
+            msg: "Success: volunteer is not registered for this project!",
+          });
+        }
       }
     } catch {
       return res.status(400).json({
@@ -271,7 +289,6 @@ class ProjectsController extends BaseController {
     }
   }
 
-  // TODO: Align all data fields with FE req.body
   async updateOneProject(req, res) {
     const {
       userId,
@@ -287,7 +304,6 @@ class ProjectsController extends BaseController {
     const { projectId } = req.params;
 
     try {
-      // TODO: Check if FE is validating if user = organiser, otherwise, BE to validate usertype
       await this.model.update(
         {
           userId: userId,
@@ -307,26 +323,59 @@ class ProjectsController extends BaseController {
       const updatedProject = await this.model.findByPk(projectId, {
         include: [
           {
-            model: this.user,
-          },
-          {
             model: this.target_comm,
             attributes: ["name"],
           },
+          {
+            model: this.user,
+          },
         ],
-      });
-
-      const likesCount = await this.liked_project.count({
-        where: { projectId: projectId },
       });
 
       const volunteersCount = await this.volunteer_project.count({
         where: { projectId: projectId },
       });
 
+      const likesCount = await this.liked_project.count({
+        where: { projectId: projectId },
+      });
+
+      const projectVolunteers = await this.volunteer_project.findAll({
+        where: { projectId: projectId },
+        include: [
+          {
+            model: this.user,
+          },
+          {
+            model: this.status,
+            attributes: ["id", "name"],
+          },
+          {
+            model: this.role,
+            attributes: ["id", "name"],
+          },
+        ],
+        attributes: [],
+      });
+
+      const communications = await this.project.findByPk(projectId, {
+        include: [
+          {
+            model: this.communication,
+          },
+        ],
+        attributes: [],
+      });
+
       return res.status(200).json({
         success: true,
-        data: { ...updatedProject.toJSON(), likesCount, volunteersCount },
+        data: {
+          ...updatedProject.toJSON(),
+          likesCount,
+          volunteersCount,
+          projectVolunteers,
+          communications,
+        },
         msg: "Success: project data updated!",
       });
     } catch {
@@ -352,7 +401,7 @@ class ProjectsController extends BaseController {
         });
       }
 
-      // ?
+      // ? add communication and comments too
       await this.volunteer_project.destroy({
         where: { projectId: projectId },
       });
@@ -379,3 +428,129 @@ class ProjectsController extends BaseController {
 }
 
 module.exports = ProjectsController;
+
+// async getOneProject(req, res) {
+//   const { projectId } = req.params;
+//   const userId = req.query.userId;
+//   try {
+//     // for all users: can view project details.
+//     const project = await this.model.findByPk(projectId, {
+//       include: [
+//         {
+//           model: this.target_comm,
+//           attributes: ["name"],
+//         },
+//         {
+//           model: this.user,
+//         },
+//       ],
+//     });
+
+//     const volunteersCount = await this.volunteer_project.count({
+//       where: { projectId: projectId },
+//     });
+
+//     // count the total number of likes the project has received
+//     const likesCount = await this.liked_project.count({
+//       where: { projectId: projectId },
+//     });
+
+//     if (!project) {
+//       return res.status(404).json({
+//         error: true,
+//         msg: "Error: project not found.",
+//       });
+//     }
+
+//     const user = await this.user.findByPk(userId);
+
+//     // check if user is a volunteer
+//     if (user.usertypeId === 1) {
+//       // check if volunteer has already registered for the project
+//       const alreadyRegistered = await this.volunteer_project.findOne({
+//         where: { userId: userId, projectId: projectId },
+//       });
+
+//       // for registered volunteers: display project details + registration status.
+//       if (alreadyRegistered) {
+//         const registeredVolunteer = await this.volunteer_project.findByPk(
+//           userId,
+//           {
+//             include: [
+//               {
+//                 model: this.status,
+//                 attributes: ["name"],
+//               },
+//             ],
+//             attributes: [],
+//           }
+//         );
+
+//         const communications = await this.project.findByPk(projectId, {
+//           include: [
+//             {
+//               model: this.communication,
+//             },
+//           ],
+//           attributes: [],
+//         });
+
+//         return res.status(200).json({
+//           success: true,
+//           data: {
+//             ...project.toJSON(),
+//             likesCount,
+//             volunteersCount,
+//             registeredVolunteer,
+//             communications,
+//           },
+//           msg: "Success: retrieved details of the registered volunteer!",
+//         });
+//       } else {
+//         // for unregistered volunteers: display project details only.
+//         return res.status(200).json({
+//           success: true,
+//           data: { ...project.toJSON(), likesCount, volunteersCount },
+//           msg: "Success: volunteer is not registered for this project!",
+//         });
+//       }
+//       // if usertype != 1, user = organiser
+//     } else {
+//       // TODO: to include communications for organisers.
+//       // for organisers: display project details + registered volunteers.
+//       const projectVolunteers = await this.volunteer_project.findAll({
+//         where: { projectId: projectId },
+//         include: [
+//           {
+//             model: this.user,
+//           },
+//           {
+//             model: this.status,
+//             attributes: ["name"],
+//           },
+//           {
+//             model: this.role,
+//             attributes: ["name"],
+//           },
+//         ],
+//         attributes: [],
+//       });
+
+//       return res.status(200).json({
+//         success: true,
+//         data: {
+//           ...project.toJSON(),
+//           likesCount,
+//           volunteersCount,
+//           projectVolunteers,
+//         },
+//         msg: "Success: retrieved information of all registered volunteers, including registration statuses and project roles.",
+//       });
+//     }
+//   } catch {
+//     return res.status(400).json({
+//       error: true,
+//       msg: "Error: unable to retrieve project data.",
+//     });
+//   }
+// }

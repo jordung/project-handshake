@@ -8,6 +8,7 @@ class ProjectsRegistrationController extends BaseController {
     volunteer_project,
     liked_project,
     status,
+    role,
   }) {
     super(volunteer_project);
 
@@ -17,6 +18,7 @@ class ProjectsRegistrationController extends BaseController {
     this.volunteer_project = volunteer_project;
     this.liked_project = liked_project;
     this.status = status;
+    this.role = role;
   }
 
   // join project = display view for registered volunteers //
@@ -40,8 +42,8 @@ class ProjectsRegistrationController extends BaseController {
           const joinProject = await this.model.create({
             userId: userId,
             projectId: projectId,
-            // initialise status to "Pending"
             statusId: 1,
+            roleId: 1,
           });
 
           // returns display results for registered volunteers
@@ -56,7 +58,11 @@ class ProjectsRegistrationController extends BaseController {
               },
               {
                 model: this.status,
-                attributes: ["name"],
+                attributes: ["id", "name"],
+              },
+              {
+                model: this.role,
+                attributes: ["id", "name"],
               },
             ],
           });

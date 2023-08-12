@@ -8,13 +8,18 @@ class UsersRouter {
   }
   routes() {
     router.get("/all", this.controller.getAllUsers.bind(this.controller));
+    router.get("/", this.controller.getOneUser.bind(this.controller));
+    router.post("/", this.controller.addOneUser.bind(this.controller));
+    router.put("/:userId", this.controller.updateOneUser.bind(this.controller));
+
     router.get(
       "/organisers",
       this.controller.getAllOrganisers.bind(this.controller)
     );
-    router.get("/", this.controller.getOneUser.bind(this.controller));
-    router.post("/", this.controller.addOneUser.bind(this.controller));
-    router.put("/:userId", this.controller.updateOneUser.bind(this.controller));
+    router.get(
+      "/organiser/:userId",
+      this.controller.getOneOrganiser.bind(this.controller)
+    );
 
     // TODO: UPDATE DELETE FUNCTION [WIP]
     router.delete(

@@ -53,6 +53,11 @@ module.exports = {
     ]);
     await queryInterface.bulkInsert("roles", [
       {
+        name: "Unassigned",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      {
         name: "Committee",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

@@ -28,12 +28,37 @@ class UsersController extends BaseController {
       return res.status(200).json({
         success: true,
         data: organisers,
-        msg: "Success: all organisers retrieved!",
+        msg: "Success: retrieved data for all organisers!",
       });
     } catch (error) {
       return res.status(400).json({
         error: true,
         msg: "Error: unable to retrieve all organisers.",
+      });
+    }
+  }
+
+  async getOneOrganiser(req, res) {
+    const { userId } = req.params;
+    try {
+      const organiser = await this.model.findByPk(userId, {
+        include: [
+          {
+            model: this.organiser,
+            attributes: ["website"],
+          },
+        ],
+      });
+
+      return res.status(200).json({
+        success: true,
+        data: organiser,
+        msg: "Success: organiser data retrieved!",
+      });
+    } catch (error) {
+      return res.status(400).json({
+        error: true,
+        msg: "Error: unable to retrieve data for organiser.",
       });
     }
   }

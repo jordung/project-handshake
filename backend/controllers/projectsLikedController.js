@@ -22,11 +22,11 @@ class ProjectsLikedController extends BaseController {
           include: [
             {
               model: this.project,
-              attributes: ["title"],
+              attributes: ["title", "location", "startDate", "endDate"],
               include: [
                 {
                   model: this.user,
-                  attributes: ["name", "usertypeId"],
+                  attributes: ["id", "name", "usertypeId", "profileUrl"],
                 },
               ],
             },
