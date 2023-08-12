@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function Home() {
-  // TODO: Call API to figure out if user is volunteer/organiser and render out accordingly
   const { user } = useAuth0();
   const [pageLoading, setPageLoading] = useState(true);
   const navigate = useNavigate();
@@ -54,7 +53,7 @@ function Home() {
   return (
     <div className="flex pt-20 justify-center items-center w-screen md:pt-10">
       {userDetails && userDetails.usertypeId === 1 ? (
-        <VolunteerHome />
+        <VolunteerHome userDetails={userDetails} />
       ) : (
         <OrganiserHome />
       )}

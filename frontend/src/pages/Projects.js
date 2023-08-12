@@ -5,26 +5,54 @@ import ProjectCard from "../components/ProjectCard";
 import {
   getOrganiserTypeDisplay,
   getProjectTargetDisplay,
-} from "../constants/formatProjectCard";
-import { formatDateTime } from "../constants/formatProjectCard";
+} from "../utils/formatInformation";
+import { formatDateTime } from "../utils/formatInformation";
 import projectsImg from "../assets/projects/projects.svg";
+import { useAuth0 } from "@auth0/auth0-react";
 
 function Projects() {
   const [pageLoading, setPageLoading] = useState(true);
   const [projectList, setProjectList] = useState([]);
   const [filterTargetComm, setFilterTargetComm] = useState(null);
   const [filteredProjectList, setFilteredProjectList] = useState([]);
+  const [userDetails, setUserDetails] = useState([]);
+
+  const { user, isAuthenticated } = useAuth0();
 
   useEffect(() => {
     const getProjects = async () => {
-      const response = await axios.get(
+      const projectsList = await axios.get(
         `${process.env.REACT_APP_DB_API}/projects`
       );
-      setProjectList(response.data.data);
-      setPageLoading(false);
-    };
 
-    getProjects();
+      const userDetails = await axios.get(
+        `${process.env.REACT_APP_DB_API}/users`,
+        {
+          params: {
+            email: user.email,
+          },
+        }
+      );
+      Promise.all([projectsList.data.data, userDetails.data.data]).then(
+        (values) => {
+          setProjectList(values[0]);
+          setUserDetails(values[1]);
+          setPageLoading(false);
+        }
+      );
+    };
+    if (isAuthenticated) {
+      getProjects();
+    } else {
+      const getUnauthorisedProjects = async () => {
+        const unauthorisedProjectList = await axios.get(
+          `${process.env.REACT_APP_DB_API}/projects`
+        );
+        setProjectList(unauthorisedProjectList.data.data);
+        setPageLoading(false);
+      };
+      getUnauthorisedProjects();
+    }
   }, []);
 
   useEffect(() => {
@@ -144,6 +172,8 @@ function Projects() {
             <ProjectCard
               key={project.id}
               projectId={project.id}
+              usertypeId={userDetails.usertypeId}
+              userId={userDetails.id}
               projectImg={project.image}
               projectTitle={project.title}
               projectDate={formatDateTime(project.startDate, project.endDate)}

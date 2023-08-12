@@ -7,9 +7,9 @@ import {
   formatDateTime,
   getOrganiserTypeDisplay,
   getProjectTargetDisplay,
-} from "../constants/formatProjectCard";
+} from "../utils/formatInformation";
 
-function VolunteerHome() {
+function VolunteerHome({ userDetails }) {
   const [pageLoading, setPageLoading] = useState(true);
   const [projectList, setProjectList] = useState([]);
   const [filterTargetComm, setFilterTargetComm] = useState(null);
@@ -23,7 +23,6 @@ function VolunteerHome() {
       setProjectList(response.data.data);
       setPageLoading(false);
     };
-
     getProjects();
   }, []);
 
@@ -149,24 +148,34 @@ function VolunteerHome() {
         {/* Projects Section */}
         <div className="flex flex-col mx-4 mb-8 md:flex-row md:flex-wrap md:gap-3 md:justify-center">
           {filteredProjectList.length > 0 &&
-            filteredProjectList.map((project) => (
-              <ProjectCard
-                key={project.id}
-                projectId={project.id}
-                projectImg={project.image}
-                projectTitle={project.title}
-                projectDate={formatDateTime(project.startDate, project.endDate)}
-                projectTarget={getProjectTargetDisplay(project.targetCommId)}
-                currentVolunteerCount={project.volunteersCount}
-                requiredVolunteerCount={project.volunteersRequired}
-                organiserId={project.userId}
-                organiserImg={project.user.profileUrl}
-                organiserName={project.user.name}
-                organiserType={getOrganiserTypeDisplay(project.user.usertypeId)}
-                projectLikeCount={project.likesCount}
-                projectLocation={project.location}
-              />
-            ))}
+            filteredProjectList
+              .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+              .filter((project) => new Date(project.startDate) >= new Date())
+              .map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  usertypeId={userDetails.usertypeId}
+                  userId={userDetails.id}
+                  projectId={project.id}
+                  projectImg={project.image}
+                  projectTitle={project.title}
+                  projectDate={formatDateTime(
+                    project.startDate,
+                    project.endDate
+                  )}
+                  projectTarget={getProjectTargetDisplay(project.targetCommId)}
+                  currentVolunteerCount={project.volunteersCount}
+                  requiredVolunteerCount={project.volunteersRequired}
+                  organiserId={project.userId}
+                  organiserImg={project.user.profileUrl}
+                  organiserName={project.user.name}
+                  organiserType={getOrganiserTypeDisplay(
+                    project.user.usertypeId
+                  )}
+                  projectLikeCount={project.likesCount}
+                  projectLocation={project.location}
+                />
+              ))}
         </div>
       </div>
     </div>
