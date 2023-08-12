@@ -1,49 +1,33 @@
 import { useEffect, useState } from "react";
 import Spinner from "../components/Spinner";
 import axios from "axios";
-import ProjectCard from "../components/ProjectCard";
-import {
-  getOrganiserTypeDisplay,
-  getProjectTargetDisplay,
-} from "../constants/formatProjectCard";
-import { formatDateTime } from "../constants/formatProjectCard";
+import { getOrganiserTypeDisplay } from "../constants/formatProjectCard";
 import organisersImg from "../assets/organisers/organisers.svg";
+import OrganiserCard from "../components/OrganiserCard";
 
 function Organisers() {
   const [pageLoading, setPageLoading] = useState(true);
-  const [projectList, setProjectList] = useState([]);
-  const [filterTargetComm, setFilterTargetComm] = useState(null);
-  const [filteredProjectList, setFilteredProjectList] = useState([]);
+  const [organiserList, setOrganiserList] = useState([]);
 
   useEffect(() => {
-    const getProjects = async () => {
+    const getOrganisers = async () => {
       const response = await axios.get(
-        `${process.env.REACT_APP_DB_API}/projects`
+        `${process.env.REACT_APP_DB_API}/users/organisers`
       );
-      setProjectList(response.data.data);
+      // console.log(response.data.data);
+      setOrganiserList(response.data.data);
       setPageLoading(false);
     };
 
-    getProjects();
+    getOrganisers();
   }, []);
-
-  useEffect(() => {
-    if (filterTargetComm) {
-      const filteredData = projectList.filter(
-        (project) => project.targetCommId === filterTargetComm
-      );
-      setFilteredProjectList(filteredData);
-    } else {
-      setFilteredProjectList(projectList);
-    }
-  }, [filterTargetComm, projectList]);
 
   if (pageLoading) {
     return <Spinner />;
   }
 
   return (
-    <div className="bg-white w-full pt-16 md:pt-10 md:flex md:flex-col md:items-center">
+    <div className="bg-white w-full pt-16 md:py-10 md:flex md:flex-col md:items-center">
       <div className="relative">
         <div className="opacity-30 h-[25vh] w-screen overflow-y-hidden xl:h-[50vh]">
           <img
@@ -59,98 +43,21 @@ function Organisers() {
           </p>
         </div>
       </div>
-
-      <div className="mt-4 flex flex-col mx-8">
-        <div className="flex flex-wrap gap-2">
-          <div
-            className={`btn btn-xs transition-all duration-300 font-normal  ${
-              filterTargetComm === 1
-                ? "btn-primary"
-                : "btn-ghost border-1 border-neutral"
-            }`}
-            onClick={() => setFilterTargetComm(1)}
-          >
-            Seniors
-          </div>
-          <div
-            className={`btn btn-xs transition-all duration-300 font-normal  ${
-              filterTargetComm === 2
-                ? "btn-primary"
-                : "btn-ghost border-1 border-neutral"
-            }`}
-            onClick={() => setFilterTargetComm(2)}
-          >
-            Youths
-          </div>
-          <div
-            className={`btn btn-xs transition-all duration-300 font-normal  ${
-              filterTargetComm === 3
-                ? "btn-primary"
-                : "btn-ghost border-1 border-neutral"
-            }`}
-            onClick={() => setFilterTargetComm(3)}
-          >
-            Animals
-          </div>
-          <div
-            className={`btn btn-xs transition-all duration-300 font-normal  ${
-              filterTargetComm === 4
-                ? "btn-primary"
-                : "btn-ghost border-1 border-neutral"
-            }`}
-            onClick={() => setFilterTargetComm(4)}
-          >
-            Environment
-          </div>
-          <div
-            className={`btn btn-xs transition-all duration-300 font-normal  ${
-              filterTargetComm === 5
-                ? "btn-primary"
-                : "btn-ghost border-1 border-neutral"
-            }`}
-            onClick={() => setFilterTargetComm(5)}
-          >
-            People with Disabilities
-          </div>
-          <div
-            className={`btn btn-xs transition-all duration-300 font-normal  ${
-              filterTargetComm === 6
-                ? "btn-primary"
-                : "btn-ghost border-1 border-neutral"
-            }`}
-            onClick={() => setFilterTargetComm(6)}
-          >
-            Others
-          </div>
-        </div>
-        {filterTargetComm && (
-          <div>
-            <button
-              className="btn btn-xs uppercase mt-2 btn-secondary font-normal"
-              onClick={() => setFilterTargetComm(null)}
-            >
-              Clear Filter
-            </button>
-          </div>
-        )}
-      </div>
-      <div className="flex flex-col mx-8 mt-4 md:flex-row md:flex-wrap md:gap-3 md:justify-center">
-        {filteredProjectList.length > 0 &&
-          filteredProjectList.map((project) => (
-            <ProjectCard
-              key={project.id}
-              projectImg={project.image}
-              projectTitle={project.title}
-              projectDate={formatDateTime(project.startDate, project.endDate)}
-              projectTarget={getProjectTargetDisplay(project.targetCommId)}
-              currentVolunteerCount={project.volunteersCount}
-              requiredVolunteerCount={project.volunteersRequired}
-              organiserImg={project.user.profileUrl}
-              organiserName={project.user.name}
-              organiserType={getOrganiserTypeDisplay(project.user.usertypeId)}
-              projectLikeCount={project.likesCount}
-            />
-          ))}
+      <div className="flex flex-col mx-8 mt-0 md:flex-row md:flex-wrap md:gap-3 md:justify-center md:mt-8 md:w-screen">
+        {organiserList.length > 0 &&
+          organiserList
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((organiser) => (
+              <OrganiserCard
+                key={organiser.id}
+                organiserId={organiser.id}
+                organiserImg={organiser.profileUrl}
+                organiserName={organiser.name}
+                organiserUsername={organiser.username}
+                organiserType={getOrganiserTypeDisplay(organiser.usertypeId)}
+                organiserBio={organiser.biography}
+              />
+            ))}
       </div>
     </div>
   );

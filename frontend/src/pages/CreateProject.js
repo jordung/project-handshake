@@ -47,14 +47,15 @@ function CreateProject() {
       getUserDetails()
         .then((response) => {
           setUserDetails(response.data.data);
-          setPageLoading(false);
-        })
-        .catch((error) => {
-          if (error.response.status === 404) {
-            navigate("/setprofile");
+          if (response.data.data.usertypeId === 1) {
+            navigate("/home");
           } else {
-            console.log(error);
+            setPageLoading(false);
           }
+        })
+
+        .catch((error) => {
+          console.log(error);
         });
     }
   }, []);
@@ -179,7 +180,7 @@ function CreateProject() {
     <div className="bg-white w-full h-screen flex justify-center items-start md:flex-row md:justify-evenly lg:px-16">
       <div
         className={`toast toast-top pt-20 toast-end transition-opacity ease-in-out duration-1000 ${
-          formError ? "opacity-100" : "opacity-0"
+          formError ? "opacity-100" : "opacity-0 max-sm:hidden"
         }`}
       >
         <div className="alert alert-error text-white font-medium rounded-lg md:pr-0 text-xs">
@@ -229,7 +230,7 @@ function CreateProject() {
             Target Community
           </label>
           <select
-            className="select mt-1"
+            className="select mt-1 font-normal text-xs"
             onChange={(e) => setTargetCommunity(e.target.value)}
             value={targetCommunity || ""}
           >
@@ -246,7 +247,7 @@ function CreateProject() {
             <input
               type="text"
               placeholder="Charity auction for stray dogs in Singapore"
-              className="input font-medium text-sm mt-1 truncate"
+              className="input font-normal text-xs mt-1 truncate"
               value={projectTitle}
               onChange={(e) => setProjectTitle(e.target.value)}
             />
@@ -256,7 +257,7 @@ function CreateProject() {
             <input
               type="text"
               placeholder="Singapore"
-              className="input font-medium text-sm mt-1 w-full"
+              className="input font-normal text-xs mt-1 w-full"
               autoComplete="off"
               value={projectLocation}
               onChange={handleLocationChange}
@@ -279,14 +280,14 @@ function CreateProject() {
           <label className="label-text font-medium mt-4">Start Date</label>
           <input
             type="datetime-local"
-            className="input font-medium text-sm mt-1"
+            className="input font-normal text-xs mt-1"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
           />
           <label className="label-text font-medium mt-4">End Date</label>
           <input
             type="datetime-local"
-            className="input font-medium text-sm mt-1"
+            className="input font-normal text-xs mt-1"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
           />
@@ -295,7 +296,7 @@ function CreateProject() {
           </label>
           <input
             type="number"
-            className="input font-medium text-sm mt-1"
+            className="input font-normal text-xs mt-1"
             value={volunteersRequired}
             onChange={(e) => setVolunteersRequired(e.target.value)}
           />
@@ -303,20 +304,20 @@ function CreateProject() {
             General Information & Description
           </label>
           <textarea
-            className="textarea resize-none font-medium text-sm mt-1"
-            placeholder="Bio"
+            className="textarea resize-none font-normal text-xs mt-1"
+            placeholder="Event Description"
             value={generalInfo}
-            rows={4}
+            rows={6}
             onChange={(e) => setGeneralInfo(e.target.value)}
           ></textarea>
           <button
-            className="btn btn-neutral mt-4 normal-case"
+            className="btn btn-neutral font-medium text-sm mt-4 normal-case"
             onClick={handleSubmit}
           >
             Let's go!
           </button>
           <button
-            className="btn btn-outline mt-2 mb-8 normal-case"
+            className="btn btn-secondary font-medium text-sm mt-2 mb-8 normal-case"
             onClick={() => navigate("/home")}
           >
             Cancel

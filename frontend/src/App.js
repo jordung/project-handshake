@@ -9,7 +9,10 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Spinner from "./components/Spinner";
 
-import { getProjectTargetDisplay } from "./constants/formatProjectCard";
+import {
+  getOrganiserTypeDisplay,
+  getProjectTargetDisplay,
+} from "./constants/formatProjectCard";
 
 import {
   KBarProvider,
@@ -34,18 +37,26 @@ function App() {
     useAuth0();
   const [pageLoading, setPageLoading] = useState(true);
   const [allProjectsList, setAllProjectsList] = useState([]);
+  const [allOrganisersList, setAllOrganisersList] = useState([]);
 
   const location = useLocation();
 
   useEffect(() => {
     const getProjects = async () => {
-      const response = await axios.get(
+      const projects = await axios.get(
         `${process.env.REACT_APP_DB_API}/projects`
       );
-      setAllProjectsList(response.data.data);
+      setAllProjectsList(projects.data.data);
+    };
+    const getOrganisers = async () => {
+      const organisers = await axios.get(
+        `${process.env.REACT_APP_DB_API}/users/organisers`
+      );
+      setAllOrganisersList(organisers.data.data);
     };
 
     getProjects();
+    getOrganisers();
 
     if (isAuthenticated) {
       setPageLoading(false);
@@ -91,19 +102,6 @@ function App() {
       section: "Pages",
       perform: () => (window.location.pathname = "organisers"),
     },
-    // {
-    //   id: "createProject",
-    //   name: "Create Project",
-    //   shortcut: ["c"],
-    //   keywords: "create project new",
-    //   subtitle: "Test",
-    //   property: "action",
-    //   section: "Actions",
-    //   perform: () =>
-    //     !isAuthenticated || userDetails.usertypeId === 1
-    //       ? handleInvalidAction()
-    //       : navigate("/createProject"),
-    // },
     {
       id: "alogout",
       name: "Logout",
@@ -154,7 +152,16 @@ function App() {
       property: "page",
       parent: "bSearchProject",
       section: getProjectTargetDisplay(project.targetCommId),
-      perform: () => console.log(`Project: ${project.title} chosen!`),
+      perform: () => (window.location.pathname = `project/${project.id}`),
+    })),
+    ...allOrganisersList.map((organiser) => ({
+      id: `c${organiser.id.toString()}`,
+      name: organiser.name,
+      keywords: [...organiser.name, ...organiser.username],
+      property: "page",
+      parent: "bSearchOrg",
+      section: getOrganiserTypeDisplay(organiser.usertypeId),
+      perform: () => (window.location.pathname = `organiser/${organiser.id}`),
     })),
   ];
 
@@ -224,8 +231,8 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/organisers" element={<Organisers />} />
-            <Route path="/project/:id" element={<Project />} />
-            <Route path="/organiser/:id" element={<Organiser />} />
+            <Route path="/project/:projectId" element={<Project />} />
+            <Route path="/organiser/:organiserId" element={<Organiser />} />
           </Route>
 
           {/* Routes without Navbar */}

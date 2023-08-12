@@ -2,17 +2,25 @@ export function formatDateTime(startDate, endDate) {
   const startDateTime = new Date(startDate);
   const endDateTime = new Date(endDate);
 
+  // Adjust for Singapore time zone offset (UTC+8)
+  startDateTime.setUTCHours(startDateTime.getUTCHours() - 8);
+  endDateTime.setUTCHours(endDateTime.getUTCHours() - 8);
+
   const formatDate = (dateTime) => {
+    const day = String(dateTime.getDate()).padStart(2);
+    const month = dateTime.toLocaleString("default", { month: "short" });
     const year = dateTime.getFullYear();
-    const month = String(dateTime.getMonth() + 1).padStart(2, "0");
-    const day = String(dateTime.getDate()).padStart(2, "0");
-    return `${day}/${month}/${year}`;
+    return `${day} ${month} ${year}`;
   };
 
   const formatTime = (dateTime) => {
-    const hours = String(dateTime.getHours()).padStart(2, "0");
-    const minutes = String(dateTime.getMinutes()).padStart(2, "0");
-    return `${hours}:${minutes}H`;
+    const options = {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+      timeZone: "Asia/Singapore",
+    };
+    return new Intl.DateTimeFormat("en-US", options).format(dateTime);
   };
 
   const sameDate = startDateTime.toDateString() === endDateTime.toDateString();
@@ -47,7 +55,7 @@ export function getProjectTargetDisplay(targetId) {
     case 6:
       return "Others";
     default:
-      return "Unknown";
+      return "NIL";
   }
 }
 
@@ -60,6 +68,34 @@ export function getOrganiserTypeDisplay(typeId) {
     case 3:
       return "Team";
     default:
-      return "Unknown";
+      return "NIL";
+  }
+}
+
+export function getVolunteerStatus(statusId) {
+  switch (statusId) {
+    case 1:
+      return "Pending";
+    case 2:
+      return "Confirmed";
+    case 3:
+      return "Rejected";
+    default:
+      return "NIL";
+  }
+}
+
+export function getVolunteerRole(roleId) {
+  switch (roleId) {
+    case 0:
+      return "Unassigned";
+    case 1:
+      return "Committee";
+    case 2:
+      return "Facilitator";
+    case 3:
+      return "Participant";
+    default:
+      return "NIL";
   }
 }

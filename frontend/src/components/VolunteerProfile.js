@@ -4,26 +4,165 @@ import Spinner from "../components/Spinner";
 import ProfileProjectCard from "../components/ProfileProjectCard";
 import Tabs from "../components/Tabs";
 import profilePageImg from "../assets/profile/wave.svg";
+import axios from "axios";
+import {
+  formatDateTime,
+  getOrganiserTypeDisplay,
+  getProjectTargetDisplay,
+} from "../constants/formatProjectCard";
+import { storage } from "../firebase";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytes,
+} from "firebase/storage";
+import { FaCanadianMapleLeaf } from "react-icons/fa6";
 
-function VolunteerProfile({ userDetails }) {
-  // TODO: edit profile functionality
-  // TODO: getOngoingProjects, getTotalProjects, getTotalVolunteers for stats
-  // TODO: getUpcomingProjects, getPastProjects
+function VolunteerProfile({ userDetails, setUserDetails }) {
   const { isAuthenticated, isLoading } = useAuth0();
   const [pageLoading, setPageLoading] = useState(true);
+  const [totalHoursClocked, setTotalHoursClocked] = useState(0);
+  const [latestProjects, setLatestProjects] = useState([]);
+  const [upcomingProjects, setUpcomingProjects] = useState([]);
+  const [likedProjects, setLikedProjects] = useState([]);
+
+  // states for edit profile modal
+  const [editedProfilePictureFile, setEditedProfilePictureFile] = useState("");
+  const [editedBiography, setEditedBiography] = useState("");
+  const [editedUserLocation, setEditedUserLocation] = useState("");
+  const [editedPhoneNumber, setEditedPhoneNumber] = useState("");
+  const [editedTargetComm, setEditedTargetComm] = useState("");
+
+  const STORAGE_KEY = "profile/";
+
+  const deleteProfilePicture = () => {
+    setEditedProfilePictureFile(null);
+  };
 
   useEffect(() => {
     if (isAuthenticated) {
-      setPageLoading(false);
+      const getVolunteerInformation = async () => {
+        const volunteerInfo = await axios.get(
+          // `${process.env.REACT_APP_DB_API}/volunteers/${userDetails.id}`
+          `${process.env.REACT_APP_DB_API}/volunteers/5`
+        );
+        // console.log(volunteerInfo.data.data);
+        const volunteerLikedProjects = await axios.get(
+          `${process.env.REACT_APP_DB_API}/likes/${userDetails.id}`
+        );
+        // console.log(volunteerLikedProjects.data.data);
+        Promise.all([
+          volunteerInfo.data.data,
+          volunteerLikedProjects.data.data,
+        ]).then((values) => {
+          setTotalHoursClocked(values[0].totalHoursClocked);
+          setLatestProjects(values[0].latestProjects);
+          setUpcomingProjects(values[0].upcomingProjects);
+          setLikedProjects(values[1]);
+          setEditedBiography(
+            userDetails.biography === null ? "" : userDetails.biography
+          );
+          setEditedUserLocation(userDetails.location);
+          setEditedPhoneNumber(userDetails.phone);
+          setEditedTargetComm(userDetails.volunteer.targetCommId);
+          setPageLoading(false);
+        });
+      };
+      getVolunteerInformation();
     }
   }, [isAuthenticated]);
+
+  const handleResetEditProfileModal = (e) => {
+    e.preventDefault();
+    setEditedProfilePictureFile("");
+    setEditedBiography(
+      userDetails.biography === null ? "" : userDetails.biography
+    );
+    setEditedUserLocation(userDetails.location);
+    setEditedPhoneNumber(userDetails.phone);
+    setEditedTargetComm(userDetails.volunteer.targetCommId);
+  };
+
+  const handleEditProfile = async () => {
+    if (editedProfilePictureFile) {
+      setPageLoading(true);
+      try {
+        const oldProfilePicRef = ref(storage, userDetails.profileUrl);
+        deleteObject(oldProfilePicRef);
+        console.log("Old profile picture deleted successfully.");
+      } catch (error) {
+        console.log("Error! Old profile picture not found!");
+      }
+
+      const storageRefInstance = ref(
+        storage,
+        STORAGE_KEY + editedProfilePictureFile.name
+      );
+      uploadBytes(storageRefInstance, editedProfilePictureFile).then(
+        (snapshot) => {
+          getDownloadURL(
+            storageRefInstance,
+            editedProfilePictureFile.name
+          ).then(async (url) => {
+            console.log(url);
+            try {
+              const response = await axios.put(
+                `${process.env.REACT_APP_DB_API}/users/${userDetails.id}`,
+                {
+                  phoneNumber: editedPhoneNumber,
+                  biography: editedBiography,
+                  userLocation: editedUserLocation,
+                  profilePicture: url,
+                  targetComm: editedTargetComm,
+                }
+              );
+              console.log(response);
+              setUserDetails(response.data.data);
+              setEditedPhoneNumber(response.data.data.phone);
+              setEditedBiography(response.data.data.biography);
+              setEditedUserLocation(response.data.data.location);
+              setEditedProfilePictureFile("");
+              setEditedTargetComm(response.data.data.volunteer.targetCommId);
+              setPageLoading(false);
+            } catch (error) {
+              console.log(error);
+            }
+          });
+        }
+      );
+    } else {
+      try {
+        const response = await axios.put(
+          `${process.env.REACT_APP_DB_API}/users/${userDetails.id}`,
+          {
+            phoneNumber: editedPhoneNumber,
+            biography: editedBiography,
+            userLocation: editedUserLocation,
+            profilePicture: userDetails.profileUrl,
+            targetComm: editedTargetComm,
+          }
+        );
+        console.log(response);
+        setUserDetails(response.data.data);
+        setEditedPhoneNumber(response.data.data.phone);
+        setEditedBiography(response.data.data.biography);
+        setEditedUserLocation(response.data.data.location);
+        setEditedProfilePictureFile("");
+        setEditedTargetComm(response.data.data.volunteer.targetCommId);
+        setPageLoading(false);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
 
   if (pageLoading || isLoading) {
     return <Spinner />;
   }
 
   return (
-    <div className="w-full pt-16">
+    <div className="w-full pt-16 lg:mb-16">
       <img
         className="hidden md:block fixed -z-20 w-screen h-[90vh] bottom-0 object-cover"
         src={profilePageImg}
@@ -33,60 +172,204 @@ function VolunteerProfile({ userDetails }) {
         <div className="lg:w-1/6 lg:flex-col lg:justify-center lg:items-center">
           <div className="flex flex-col justify-center items-center mt-8 prose md:min-w-full lg:items-center">
             <img
-              className="h-48 w-48 object-cover rounded-full shadow-xl"
+              className="h-48 w-48 object-cover rounded-full shadow-xl mb-2"
               src={userDetails.profileUrl}
               alt="profile"
             />
             <h3 className="my-0">{userDetails.name}</h3>
-            <p className="mt-0 font-medium">@{userDetails.username}</p>
+            <p className="my-0 font-medium">@{userDetails.username}</p>
+            <button
+              className="btn btn-primary btn-sm font-medium text-sm normal-case md:h-10 mt-2"
+              onClick={() => window.editProfileModal.showModal()}
+            >
+              Edit Profile
+            </button>
+            {/* Edit Profile Modal */}
+            <dialog
+              id="editProfileModal"
+              className="modal backdrop-blur-sm not-prose"
+            >
+              <form method="dialog" className="modal-box bg-white">
+                <button className="btn btn-sm btn-circle btn-ghost outline-none absolute right-2 top-2">
+                  ✕
+                </button>
+                <h3 className="font-bold text-lg text-left">Edit Profile</h3>
+                <div className="w-full px-2 mt-4 max-h-[30vh] md:max-h-[50vh] overflow-y-scroll">
+                  <div className="flex flex-col">
+                    <div className="w-full flex flex-col items-center">
+                      <label className="label-text font-medium mt-4">
+                        Profile Picture
+                      </label>
+                      <label htmlFor="image-input" className="cursor-pointer">
+                        {editedProfilePictureFile ? (
+                          <div className="mb-1 flex flex-col">
+                            <img
+                              className="mb-0 mt-1 h-32 w-32 rounded-full object-cover"
+                              src={URL.createObjectURL(
+                                editedProfilePictureFile
+                              )}
+                              alt="user upload"
+                            />
+                          </div>
+                        ) : (
+                          <img
+                            className="mb-0 mt-1 h-32 w-32 rounded-full object-cover"
+                            src={userDetails.profileUrl}
+                            alt="user upload"
+                          />
+                        )}
+                      </label>
+                      {editedProfilePictureFile && (
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline normal-case font-normal mt-2"
+                          onClick={deleteProfilePicture}
+                        >
+                          Delete
+                        </button>
+                      )}
+                      <input
+                        id="image-input"
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) =>
+                          setEditedProfilePictureFile(e.target.files[0])
+                        }
+                      />
+                    </div>
+                    <label className="label-text font-medium mt-4">
+                      Biography
+                    </label>
+                    <input
+                      type="text"
+                      className="input font-normal text-xs mt-1 w-full"
+                      value={editedBiography}
+                      onChange={(e) => setEditedBiography(e.target.value)}
+                    />
+                    <label className="label-text font-medium mt-4">
+                      Location
+                    </label>
+                    <input
+                      type="text"
+                      className="input font-normal text-xs mt-1 w-full"
+                      value={editedUserLocation}
+                      onChange={(e) => setEditedUserLocation(e.target.value)}
+                    />
+                    <label className="label-text font-medium mt-4">
+                      Phone Number
+                    </label>
+                    <input
+                      type="text"
+                      className="input font-normal text-xs mt-1 w-full"
+                      value={editedPhoneNumber}
+                      onChange={(e) => setEditedPhoneNumber(e.target.value)}
+                    />
+                    <label className="label-text font-medium mt-4">
+                      Target Community
+                    </label>
+                    <select
+                      className="select my-1 font-normal text-xs"
+                      onChange={(e) => setEditedTargetComm(e.target.value)}
+                      value={editedTargetComm || ""}
+                    >
+                      <option value="" disabled></option>
+                      <option value="1">Seniors</option>
+                      <option value="2">Youths</option>
+                      <option value="3">Animals</option>
+                      <option value="4">Environment</option>
+                      <option value="5">People with Disabilities</option>
+                      <option value="6">Others</option>
+                    </select>
+                  </div>
+                </div>
+                <button
+                  className="btn btn-primary font-medium text-sm normal-case w-full mt-4"
+                  onClick={handleEditProfile}
+                >
+                  Save changes
+                </button>
+                <button
+                  className="btn btn-secondary font-medium text-sm normal-case w-full mt-2"
+                  onClick={handleResetEditProfileModal}
+                >
+                  Reset Values
+                </button>
+              </form>
+              <form method="dialog" className="modal-backdrop">
+                <button>close</button>
+              </form>
+            </dialog>
           </div>
           <div className="mx-8 md:mx-40 lg:mx-0">
-            <h6 className="text-lg font-semibold mt-8">Biography</h6>
+            <h6 className="text-lg font-semibold mt-6">Biography</h6>
             <p className="text-sm">
-              {userDetails.biography !== null
-                ? userDetails.biography
-                : "Welcome to Handshake."}
+              {userDetails.biography !== null ? userDetails.biography : "NIL"}
             </p>
-            <h6 className="text-lg font-semibold mt-8">Phone Number</h6>
-            <p className="text-sm">{userDetails.phone}</p>
-            <h6 className="text-lg font-semibold mt-8">Location</h6>
+            <h6 className="text-lg font-semibold mt-4">Location</h6>
             <p className="text-sm">{userDetails.location}</p>
-            <h6 className="text-lg font-semibold mt-8">Interests</h6>
-            <div className="flex gap-2 mt-1">
-              <span className="badge badge-accent uppercase py-3 text-xs font-semibold text-neutral">
-                {userDetails.volunteer.target_comm !== null
-                  ? userDetails.volunteer.target_comm.name
-                  : "NIL"}
-              </span>
-            </div>
           </div>
         </div>
         <div className="mx-8 md:mx-40 lg:mx-0 lg:w-1/2">
           <h6 className="text-lg font-semibold mt-8">Volunteer Information</h6>
           {/* Volunteer Information Card */}
           <div className="shadow-lg p-4 rounded-xl mb-8 bg-white">
+            <div className="md:flex md:gap-40 ">
+              <div>
+                <p className="font-semibold">Email Address</p>
+                <p className="text-sm">{userDetails.email}</p>
+              </div>
+              <div>
+                <p className="font-semibold mt-8 md:mt-0">Phone Number</p>
+                <p className="text-sm">{userDetails.phone}</p>
+              </div>
+            </div>
+
             <div>
-              <p className="font-semibold">Number of Hours Clocked</p>
-              <p className="text-sm">412</p>
+              <p className="font-semibold mt-8">Interests</p>
+              <p className="text-sm">
+                <span className="badge badge-accent uppercase py-3 text-xs font-semibold text-neutral">
+                  {userDetails.volunteer.targetCommId !== null
+                    ? getProjectTargetDisplay(
+                        userDetails.volunteer.targetCommId
+                      )
+                    : "NIL"}
+                </span>
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold mt-8">Number of Hours Clocked</p>
+              <p className="text-sm">{totalHoursClocked}</p>
             </div>
             <div className="mt-8">
-              <p className="font-semibold">Latest Projects Joined</p>
-              <div className="flex flex-col items-center justify-between mx-1 mt-1">
+              <p className="font-semibold mt-8">Latest Projects Joined</p>
+              <div className="flex flex-col items-center justify-between mx-1 mt-1  xl:max-h-[180px] xl:overflow-y-scroll">
                 {/* Profile Project Card */}
-                <ProfileProjectCard
-                  projectTitle="Building school for youths"
-                  projectDate="24/7/2023"
-                  organiserImg="https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2864&q=80"
-                  organiserName="YouthsForLife"
-                  organiserType="team"
-                />
-                <ProfileProjectCard
-                  projectTitle="Grocery shopping with the senior citizens!"
-                  projectDate="28/8/2023"
-                  organiserImg="https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2864&q=80"
-                  organiserName="SeniorsOfSG"
-                  organiserType="organisation"
-                />
+                {latestProjects.length > 0 ? (
+                  latestProjects.map((project) => (
+                    <ProfileProjectCard
+                      key={project.project.id}
+                      projectId={project.project.id}
+                      projectTitle={project.project.title}
+                      projectDate={formatDateTime(
+                        project.project.startDate,
+                        project.project.endDate
+                      )}
+                      projectLocation={project.project.location}
+                      organiserId={project.project.user.id}
+                      organiserImg={project.project.user.profileUrl}
+                      organiserName={project.project.user.name}
+                      organiserType={getOrganiserTypeDisplay(
+                        project.project.user.usertypeId
+                      )}
+                    />
+                  ))
+                ) : (
+                  <p className="mt-2 text-sm font-medium text-neutral italic min-w-full">
+                    <FaCanadianMapleLeaf className="h-4 w-4 inline-block text-secondary" />{" "}
+                    Join a project now!
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -98,57 +381,58 @@ function VolunteerProfile({ userDetails }) {
             <div className="flex flex-col items-center justify-between mx-1 mt-1">
               <Tabs>
                 <Tabs.Tab tabLabel="Upcoming">
-                  <ProfileProjectCard
-                    projectTitle="Upcoming Project 1"
-                    projectDate="24/7/2023"
-                    organiserImg="https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2864&q=80"
-                    organiserName="YouthsForLife"
-                    organiserType="team"
-                  />
-                  <ProfileProjectCard
-                    projectTitle="Upcoming Project 2"
-                    projectDate="28/8/2023"
-                    organiserImg="https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2864&q=80"
-                    organiserName="SeniorsOfSG"
-                    organiserType="organisation"
-                  />
-                  <ProfileProjectCard
-                    projectTitle="Upcoming Project 2"
-                    projectDate="28/8/2023"
-                    organiserImg="https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2864&q=80"
-                    organiserName="SeniorsOfSG"
-                    organiserType="organisation"
-                  />
-                  <ProfileProjectCard
-                    projectTitle="Upcoming Project 2"
-                    projectDate="28/8/2023"
-                    organiserImg="https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2864&q=80"
-                    organiserName="SeniorsOfSG"
-                    organiserType="organisation"
-                  />
-                  <ProfileProjectCard
-                    projectTitle="Upcoming Project 2"
-                    projectDate="28/8/2023"
-                    organiserImg="https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2864&q=80"
-                    organiserName="SeniorsOfSG"
-                    organiserType="organisation"
-                  />
+                  {upcomingProjects.length > 0 ? (
+                    upcomingProjects.map((project) => (
+                      <ProfileProjectCard
+                        key={project.project.id}
+                        projectId={project.project.id}
+                        projectTitle={project.project.title}
+                        projectDate={formatDateTime(
+                          project.project.startDate,
+                          project.project.endDate
+                        )}
+                        projectLocation={project.project.location}
+                        organiserId={project.project.user.id}
+                        organiserImg={project.project.user.profileUrl}
+                        organiserName={project.project.user.name}
+                        organiserType={getOrganiserTypeDisplay(
+                          project.project.user.usertypeId
+                        )}
+                      />
+                    ))
+                  ) : (
+                    <p className="mt-4 text-sm font-medium text-neutral italic">
+                      <FaCanadianMapleLeaf className="h-4 w-4 inline-block text-secondary" />{" "}
+                      No upcoming projects found
+                    </p>
+                  )}
                 </Tabs.Tab>
                 <Tabs.Tab tabLabel="Saved">
-                  <ProfileProjectCard
-                    projectTitle="Saved Project 1"
-                    projectDate="24/7/2023"
-                    organiserImg="https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2864&q=80"
-                    organiserName="YouthsForLife"
-                    organiserType="team"
-                  />
-                  <ProfileProjectCard
-                    projectTitle="Saved Project 2"
-                    projectDate="28/8/2023"
-                    organiserImg="https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2864&q=80"
-                    organiserName="SeniorsOfSG"
-                    organiserType="organisation"
-                  />
+                  {likedProjects.length > 0 ? (
+                    likedProjects.map((project) => (
+                      <ProfileProjectCard
+                        key={project.projectId}
+                        projectId={project.projectId}
+                        projectTitle={project.project.title}
+                        projectDate={formatDateTime(
+                          project.project.startDate,
+                          project.project.endDate
+                        )}
+                        organiserId={project.project.user.id}
+                        projectLocation={project.project.location}
+                        organiserImg={project.project.user.profileUrl}
+                        organiserName={project.project.user.name}
+                        organiserType={getOrganiserTypeDisplay(
+                          project.project.user.usertypeId
+                        )}
+                      />
+                    ))
+                  ) : (
+                    <p className="mt-4 text-sm font-medium text-neutral italic">
+                      <FaCanadianMapleLeaf className="h-4 w-4 inline-block text-secondary" />{" "}
+                      No saved projects found
+                    </p>
+                  )}
                 </Tabs.Tab>
               </Tabs>
             </div>

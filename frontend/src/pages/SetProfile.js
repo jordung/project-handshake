@@ -124,6 +124,15 @@ function SetProfile() {
                 }
               );
               console.log(response);
+              setUserType("");
+              setName("");
+              setUsername("");
+              setUserLocation("");
+              setPhoneNumber("");
+              setProfilePictureFile(null);
+              setPageLoading(false);
+
+              navigate("/profile");
             } catch (error) {
               console.log(error);
             }
@@ -146,19 +155,19 @@ function SetProfile() {
           }
         );
         console.log(response);
+        setUserType("");
+        setName("");
+        setUsername("");
+        setUserLocation("");
+        setPhoneNumber("");
+        setProfilePictureFile(null);
+        setPageLoading(false);
+
+        navigate("/profile");
       } catch (error) {
         console.log(error);
       }
     }
-    setUserType("");
-    setName("");
-    setUsername("");
-    setUserLocation("");
-    setPhoneNumber("");
-    setProfilePictureFile(null);
-    setPageLoading(false);
-
-    navigate("/profile");
   };
 
   // page loading is for our own page (+ countries api loading), isLoading is for Auth0 information
@@ -194,7 +203,7 @@ function SetProfile() {
             <label className="label-text font-medium mt-4">
               Profile Picture
             </label>
-            <label htmlFor="image-input">
+            <label htmlFor="image-input" className="cursor-pointer">
               {profilePictureFile ? (
                 <div className="mb-1 flex flex-col">
                   <img
@@ -235,7 +244,7 @@ function SetProfile() {
             Are you a volunteer or organiser?
           </label>
           <select
-            className="select mt-1"
+            className="select mt-1 font-normal text-xs"
             onChange={(e) => setUserType(e.target.value)}
             value={userType || ""}
           >
@@ -249,7 +258,7 @@ function SetProfile() {
             <input
               type="text"
               placeholder="Bill Gates"
-              className="input font-medium text-sm mt-1"
+              className="input font-normal text-xs mt-1"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -259,7 +268,7 @@ function SetProfile() {
           <input
             type="text"
             placeholder="mrGatesBoi"
-            className="input font-medium text-sm mt-1"
+            className="input font-normal text-xs mt-1"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
@@ -269,7 +278,7 @@ function SetProfile() {
             <input
               type="text"
               placeholder="Singapore"
-              className="input font-medium text-sm mt-1 w-full"
+              className="input font-normal text-xs mt-1 w-full"
               autoComplete="off"
               value={userLocation}
               onChange={handleLocationChange}
@@ -280,7 +289,7 @@ function SetProfile() {
                   matchingCountries.map((country, index) => (
                     <div
                       key={index}
-                      className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-sm rounded-lg"
+                      className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-xs rounded-lg"
                       onClick={() => handleSelectedCountry(country)}
                     >
                       {country}
@@ -293,12 +302,12 @@ function SetProfile() {
           <input
             type="text"
             placeholder="+6591234567"
-            className="input font-medium text-sm mt-1"
+            className="input font-normal text-xs mt-1"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
           />
           <button
-            className="btn btn-neutral mt-4 mb-8 normal-case"
+            className="btn btn-neutral font-medium text-sm mt-4 mb-8 normal-case"
             onClick={handleSetProfile}
           >
             Update profile

@@ -54,7 +54,7 @@ function Home() {
   return (
     <div className="flex pt-20 justify-center items-center w-screen md:pt-10">
       {userDetails && userDetails.usertypeId === 1 ? (
-        <VolunteerHome />
+        <VolunteerHome userDetails={userDetails} />
       ) : (
         <OrganiserHome />
       )}
