@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Spinner from "../components/Spinner";
 import axios from "axios";
-import { getOrganiserTypeDisplay } from "../constants/formatProjectCard";
+import { getOrganiserTypeDisplay } from "../utils/formatInformation";
 import organisersImg from "../assets/organisers/organisers.svg";
 import OrganiserCard from "../components/OrganiserCard";
 

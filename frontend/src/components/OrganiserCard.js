@@ -9,14 +9,14 @@ function OrganiserCard(props) {
       onClick={() => navigate(`/organiser/${props.organiserId}`)}
     >
       <div className="flex justify-center items-start">
-        <div className="group-hover:opacity-70 transition-all duration-300 w-full">
+        <div className="group-hover:opacity-70 transition-all duration-300 flex-shrink-0">
           <img
             className="h-16 w-16 object-cover rounded-full"
             src={props.organiserImg}
             alt="project"
           />
         </div>
-        <div className="max-w-[11rem] md:max-w-[15rem] ml-4 flex flex-col items-start">
+        <div className="ml-4 flex flex-col items-start">
           <p className="text-xs font-medium md:text-sm group-hover:text-primary transition-all duration-300">
             {props.organiserName}
           </p>

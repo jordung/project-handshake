@@ -12,7 +12,7 @@ import Spinner from "./components/Spinner";
 import {
   getOrganiserTypeDisplay,
   getProjectTargetDisplay,
-} from "./constants/formatProjectCard";
+} from "./utils/formatInformation";
 
 import {
   KBarProvider,

@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function Home() {
-  // TODO: Call API to figure out if user is volunteer/organiser and render out accordingly
   const { user } = useAuth0();
   const [pageLoading, setPageLoading] = useState(true);
   const navigate = useNavigate();
