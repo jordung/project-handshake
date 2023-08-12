@@ -7,7 +7,7 @@ import {
   formatDateTime,
   getProjectTargetDisplay,
   getOrganiserTypeDisplay,
-} from "../constants/formatProjectCard";
+} from "../utils/formatInformation";
 import organiserHome from "../assets/home/organiserHome.svg";
 import { FaCanadianMapleLeaf } from "react-icons/fa6";
 

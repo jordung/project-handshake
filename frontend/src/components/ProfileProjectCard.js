@@ -1,8 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
 function ProfileProjectCard(props) {
-  // TODO: onclick project > navigate to project/:id
-  // TODO: onclick organiser > navigate to organiser/:id
   const navigate = useNavigate();
 
   return (

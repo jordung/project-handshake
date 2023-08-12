@@ -6,7 +6,6 @@ import axios from "axios";
 import OrganiserProfile from "../components/OrganiserProfile";
 
 function Profile() {
-  // TODO: update UI once the rest of the information confirmed
   const { isAuthenticated, loginWithRedirect, user } = useAuth0();
   const [pageLoading, setPageLoading] = useState(true);
   const [userDetails, setUserDetails] = useState([]);

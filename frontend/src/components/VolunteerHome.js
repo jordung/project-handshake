@@ -7,7 +7,7 @@ import {
   formatDateTime,
   getOrganiserTypeDisplay,
   getProjectTargetDisplay,
-} from "../constants/formatProjectCard";
+} from "../utils/formatInformation";
 
 function VolunteerHome({ userDetails }) {
   const [pageLoading, setPageLoading] = useState(true);

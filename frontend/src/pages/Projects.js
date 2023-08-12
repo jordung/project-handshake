@@ -5,8 +5,8 @@ import ProjectCard from "../components/ProjectCard";
 import {
   getOrganiserTypeDisplay,
   getProjectTargetDisplay,
-} from "../constants/formatProjectCard";
-import { formatDateTime } from "../constants/formatProjectCard";
+} from "../utils/formatInformation";
+import { formatDateTime } from "../utils/formatInformation";
 import projectsImg from "../assets/projects/projects.svg";
 import { useAuth0 } from "@auth0/auth0-react";
 

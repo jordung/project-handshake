@@ -9,7 +9,7 @@ import {
   formatDateTime,
   getOrganiserTypeDisplay,
   getProjectTargetDisplay,
-} from "../constants/formatProjectCard";
+} from "../utils/formatInformation";
 import { storage } from "../firebase";
 import {
   deleteObject,
@@ -44,8 +44,7 @@ function VolunteerProfile({ userDetails, setUserDetails }) {
     if (isAuthenticated) {
       const getVolunteerInformation = async () => {
         const volunteerInfo = await axios.get(
-          // `${process.env.REACT_APP_DB_API}/volunteers/${userDetails.id}`
-          `${process.env.REACT_APP_DB_API}/volunteers/5`
+          `${process.env.REACT_APP_DB_API}/volunteers/${userDetails.id}`
         );
         // console.log(volunteerInfo.data.data);
         const volunteerLikedProjects = await axios.get(
@@ -56,6 +55,7 @@ function VolunteerProfile({ userDetails, setUserDetails }) {
           volunteerInfo.data.data,
           volunteerLikedProjects.data.data,
         ]).then((values) => {
+          console.log(values[0]);
           setTotalHoursClocked(values[0].totalHoursClocked);
           setLatestProjects(values[0].latestProjects);
           setUpcomingProjects(values[0].upcomingProjects);

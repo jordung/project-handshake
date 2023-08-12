@@ -14,7 +14,7 @@ import axios from "axios";
 import {
   formatDateTime,
   getOrganiserTypeDisplay,
-} from "../constants/formatProjectCard";
+} from "../utils/formatInformation";
 import { useNavigate, useParams } from "react-router-dom";
 
 function Organiser() {

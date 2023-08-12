@@ -6,9 +6,8 @@ import { useAuth0 } from "@auth0/auth0-react";
 import {
   formatDateTime,
   getOrganiserTypeDisplay,
-  getVolunteerRole,
   getVolunteerStatus,
-} from "../constants/formatProjectCard";
+} from "../utils/formatInformation";
 import {
   FaRegHeart,
   FaHeart,
@@ -16,9 +15,15 @@ import {
   FaAngleDown,
 } from "react-icons/fa6";
 import ViewCommsModal from "../components/ViewCommsModal";
+import EditProjectModal from "../components/EditProjectModal";
+import DeleteProjectModal from "../components/DeleteProjectModal";
+import GeneralCommsTable from "../components/GeneralCommsTable";
+import VolunteerListTable from "../components/VolunteerListTable";
 
 function Project() {
-  // TODO: refactor this code!
+  // TODO: view communications modal
+  // TODO: delete communications modal
+  // TODO: add comments, delete comments
   const { projectId } = useParams();
   const { user, isAuthenticated } = useAuth0();
   const navigate = useNavigate();
@@ -30,30 +35,6 @@ function Project() {
   const [projectLikes, setProjectLikes] = useState();
   const [isJoined, setIsJoined] = useState(false);
   const [updatedRegisteredCount, setUpdatedRegisteredCount] = useState(null);
-
-  // states for edit project modal
-  const [editedTargetComm, setEditedTargetComm] = useState(null);
-  const [editedProjectTitle, setEditedProjectTitle] = useState(null);
-  const [editedLocation, setEditedLocation] = useState(null);
-  const [editedStartDate, setEditedStartDate] = useState(null);
-  const [editedEndDate, setEditedEndDate] = useState(null);
-  const [editedVolunteersRequired, setEditedVolunteersRequired] =
-    useState(null);
-  const [editedDescription, setEditedDescription] = useState(null);
-
-  // state for add communications modal
-  const [communicationTitle, setCommunicationTitle] = useState("");
-  const [communicationBody, setCommunicationBody] = useState("");
-
-  function formatCommDate(dateString) {
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const month = new Intl.DateTimeFormat("en-US", { month: "short" }).format(
-      date
-    );
-    const year = date.getFullYear();
-    return `${day} ${month} ${year}`;
-  }
 
   useEffect(() => {
     const getAuthorisedProjectInformation = async () => {
@@ -78,16 +59,8 @@ function Project() {
             }
           );
           setProjectInformation(getProjectInformation.data.data);
+          console.log(getProjectInformation.data.data);
           setProjectLikes(getProjectInformation.data.data.likesCount);
-          setEditedTargetComm(getProjectInformation.data.data.targetCommId);
-          setEditedProjectTitle(getProjectInformation.data.data.title);
-          setEditedLocation(getProjectInformation.data.data.location);
-          setEditedStartDate(getProjectInformation.data.data.startDate);
-          setEditedEndDate(getProjectInformation.data.data.endDate);
-          setEditedVolunteersRequired(
-            getProjectInformation.data.data.volunteersRequired
-          );
-          setEditedDescription(getProjectInformation.data.data.description);
           setIsJoined(
             getProjectInformation.data.data.registeredVolunteer !== undefined
           );
@@ -247,121 +220,33 @@ function Project() {
     }
   };
 
-  // delete project from delete modal
-  const handleDeleteProject = async () => {
-    // console.log("Deleting project");
-    await axios.delete(
-      `${process.env.REACT_APP_DB_API}/projects/${projectInformation.id}`
-    );
-    navigate("/home");
-  };
-
-  // edit project from edit project modal
-  const handleEditProject = () => {
-    console.log("Editing project");
-
-    const editProject = async () => {
-      // send edited information to backend
-      await axios
-        .put(
-          `${process.env.REACT_APP_DB_API}/projects/${projectInformation.id}`,
-          {
-            targetComm: editedTargetComm,
-            title: editedProjectTitle,
-            location: editedLocation,
-            startDate: editedStartDate,
-            endDate: editedEndDate,
-            volunteersReq: editedVolunteersRequired,
-            description: editedDescription,
-            imageURL: projectInformation.image,
-          }
-        )
-        .then((response) => {
-          console.log(response);
-          // grab new information from backend and set to current state
-          setProjectInformation(response.data.data);
-          setEditedTargetComm(response.data.data.targetCommId);
-          setEditedProjectTitle(response.data.data.title);
-          setEditedLocation(response.data.data.location);
-          setEditedStartDate(response.data.data.startDate);
-          setEditedEndDate(response.data.data.endDate);
-          setEditedVolunteersRequired(response.data.data.volunteersRequired);
-          setEditedDescription(response.data.data.description);
-        });
-    };
-
-    editProject();
-  };
-
-  const handleResetEditProjectModal = (e) => {
-    e.preventDefault();
-    setEditedTargetComm(projectInformation.targetCommId);
-    setEditedProjectTitle(projectInformation.title);
-    setEditedLocation(projectInformation.location);
-    setEditedStartDate(projectInformation.startDate);
-    setEditedEndDate(projectInformation.endDate);
-    setEditedVolunteersRequired(projectInformation.volunteersRequired);
-    setEditedDescription(projectInformation.description);
-  };
-
-  const handleAddCommunication = async () => {
-    const response = await axios
-      .post(`${process.env.REACT_APP_DB_API}/communications`, {
-        userId: userDetails.id,
-        projectId: projectInformation.id,
-        title: communicationTitle,
-        description: communicationBody,
-      })
-      .then(async () => {
-        const updatedProjectInformation = await axios.get(
-          `${process.env.REACT_APP_DB_API}/projects/${projectId}`,
-          {
-            params: {
-              userId: userDetails.id,
-            },
-          }
-        );
-        setProjectInformation(updatedProjectInformation.data.data);
-      });
-    setCommunicationTitle("");
-    setCommunicationBody("");
-  };
-
-  const handleUpdateVolunteerRole = async (updatedRole, volunteerId) => {
-    console.log({
-      updatedRole: parseInt(updatedRole),
-      volunteerId: volunteerId,
-      projectId: projectInformation.id,
-    });
-    const updatedProjectInformation = await axios.put(
-      `${process.env.REACT_APP_DB_API}/admin`,
-      {
-        updatedRole: updatedRole,
-        volunteerId: volunteerId,
-        projectId: projectInformation.id,
-      }
-    );
-    setProjectInformation(updatedProjectInformation.data.data);
-  };
-
-  const handleUpdateVolunteerStatus = async (updatedStatus, volunteerId) => {
-    const updatedProjectInformation = await axios.put(
-      `${process.env.REACT_APP_DB_API}/admin`,
-      {
-        updatedStatus: parseInt(updatedStatus),
-        volunteerId: volunteerId,
-        projectId: projectInformation.id,
-      }
-    );
-    setProjectInformation(updatedProjectInformation.data.data);
-  };
-
   if (pageLoading) {
     return <Spinner />;
   }
 
   return (
     <div className="flex flex-col pt-20 px-8 w-full mb-10 md:pt-10 lg:pt-20 xl:px-40">
+      {/* <div className="text-sm breadcrumbs w-full overflow-x-hidden">
+        <ul>
+          <li>
+            <p
+              className="cursor-pointer text-xs"
+              onClick={() => navigate("/home")}
+            >
+              Home
+            </p>
+          </li>
+          <li>
+            <p
+              className="cursor-pointer text-xs"
+              onClick={() => navigate("/projects")}
+            >
+              Projects
+            </p>
+          </li>
+          <li className="text-xs">{projectInformation.title}</li>
+        </ul>
+      </div> */}
       <h6 className="text-lg font-semibold text-neutral w-full">
         Project Information
       </h6>
@@ -557,152 +442,18 @@ function Project() {
               </div>
 
               {/* Edit Project Modal */}
-              <dialog id="editProjectModal" className="modal backdrop-blur-sm">
-                <form method="dialog" className="modal-box bg-white">
-                  <button className="btn btn-sm btn-circle btn-ghost outline-none absolute right-2 top-2">
-                    ✕
-                  </button>
-                  <h3 className="font-bold text-lg">Edit Project</h3>
-                  <p className="font-semibold text-sm">
-                    {projectInformation.title}
-                  </p>
-                  <div className="w-full px-2 mt-4 max-h-[30vh] md:max-h-[50vh] overflow-y-scroll">
-                    <div className="flex flex-col">
-                      <label className="label-text font-medium text-sm">
-                        Target Community
-                      </label>
-                      <select
-                        className="w-full select mt-1 font-normal text-xs"
-                        onChange={(e) => setEditedTargetComm(e.target.value)}
-                        // defaultValue={projectInformation.targetCommId}
-                        value={editedTargetComm}
-                      >
-                        <option value="1">Seniors</option>
-                        <option value="2">Youths</option>
-                        <option value="3">Animals</option>
-                        <option value="4">Environment</option>
-                        <option value="5">People with Disabilities</option>
-                        <option value="6">Others</option>
-                      </select>
-
-                      <label className="label-text font-medium mt-4">
-                        Project Title
-                      </label>
-                      <input
-                        type="text"
-                        // defaultValue={projectInformation.title}
-                        className="input font-normal text-xs mt-1 truncate"
-                        value={editedProjectTitle}
-                        onChange={(e) => setEditedProjectTitle(e.target.value)}
-                      />
-
-                      <label className="label-text font-medium mt-4">
-                        Location
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Singapore"
-                        className="input font-normal text-xs mt-1 w-full"
-                        autoComplete="off"
-                        // defaultValue={projectInformation.location}
-                        value={editedLocation}
-                        onChange={(e) => setEditedLocation(e.target.value)}
-                      />
-                      <label className="label-text font-medium mt-4">
-                        Start Date
-                      </label>
-                      <input
-                        type="datetime-local"
-                        className="input font-normal text-xs mt-1"
-                        value={editedStartDate.slice(0, 16)}
-                        onChange={(e) => setEditedStartDate(e.target.value)}
-                      />
-                      <label className="label-text font-medium mt-4">
-                        End Date
-                      </label>
-                      <input
-                        type="datetime-local"
-                        className="input font-normal text-xs mt-1"
-                        value={editedEndDate.slice(0, 16)}
-                        onChange={(e) => setEditedEndDate(e.target.value)}
-                      />
-                      <label className="label-text font-medium mt-4">
-                        No. of Volunteers Required
-                      </label>
-                      <input
-                        type="number"
-                        className="input font-normal text-xs mt-1"
-                        // defaultValue={projectInformation.volunteersRequired}
-                        value={editedVolunteersRequired}
-                        onChange={(e) =>
-                          setEditedVolunteersRequired(e.target.value)
-                        }
-                      />
-                      <label className="label-text font-medium mt-4">
-                        General Information & Description
-                      </label>
-                      <textarea
-                        className="textarea resize-none font-normal text-xs my-1"
-                        placeholder="Bio"
-                        // defaultValue={projectInformation.description}
-                        value={editedDescription}
-                        rows={6}
-                        onChange={(e) => setEditedDescription(e.target.value)}
-                      ></textarea>
-                    </div>
-                  </div>
-                  <button
-                    className="btn btn-primary font-medium text-sm normal-case w-full mt-4"
-                    onClick={handleEditProject}
-                  >
-                    Save changes
-                  </button>
-                  <button
-                    className="btn btn-secondary font-medium text-sm normal-case w-full mt-2"
-                    onClick={handleResetEditProjectModal}
-                  >
-                    Reset Values
-                  </button>
-                </form>
-                <form method="dialog" className="modal-backdrop">
-                  <button>close</button>
-                </form>
-              </dialog>
+              <EditProjectModal
+                projectInformation={projectInformation}
+                setProjectInformation={setProjectInformation}
+              />
 
               {/* Delete Modal */}
-              <dialog id="deleteModal" className="modal backdrop-blur-sm">
-                <form method="dialog" className="modal-box bg-white">
-                  <button className="btn btn-sm btn-circle btn-ghost outline-none absolute right-2 top-2">
-                    ✕
-                  </button>
-                  <h3 className="font-bold text-lg">Delete Confirmation</h3>
-                  <p className="py-4 text-sm">
-                    You're going to delete{" "}
-                    <span className="font-semibold">
-                      {projectInformation.title}
-                    </span>
-                    .
-                  </p>
-                  <p className="text-sm">
-                    This will delete the project permanently. You cannot undo
-                    this action.
-                  </p>
-                  <button
-                    className="btn btn-error font-medium text-sm normal-case w-full mt-4"
-                    onClick={handleDeleteProject}
-                  >
-                    Yes, delete
-                  </button>
-                </form>
-                <form method="dialog" className="modal-backdrop">
-                  <button>close</button>
-                </form>
-              </dialog>
+              <DeleteProjectModal projectInformation={projectInformation} />
             </div>
           )}
         </div>
       </div>
-      {/* Volunteer Information Section */}
+      {/* Volunteer Information Section - for registered volunteers */}
       {projectInformation.registeredVolunteer && (
         <div className="my-4 w-full">
           <div className="flex flex-col">
@@ -719,216 +470,24 @@ function Project() {
         </div>
       )}
 
-      {/* Volunteer List Section */}
+      {/* Volunteer List Section - for project organiser */}
       {projectInformation.projectVolunteers && (
-        <>
-          <p className="text-lg font-semibold mt-4">Volunteer List</p>
-
-          <div className="overflow-auto h-96 rounded-xl shadow-xl">
-            <table className="table table-xs rounded-xl table-pin-rows">
-              <thead className="h-10 rounded-t-xl">
-                <tr>
-                  <th className="font-normal bg-primary text-white"></th>
-                  <th className="font-normal bg-primary text-white">Name</th>
-                  <th className="font-normal bg-primary text-white">
-                    Phone Number
-                  </th>
-                  <th className="font-normal bg-primary text-white">
-                    Email Address
-                  </th>
-                  <th className="font-normal bg-primary text-white">Role</th>
-                  <th className="font-normal bg-primary text-white">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {projectInformation.projectVolunteers.length > 0 ? (
-                  projectInformation.projectVolunteers.map(
-                    (volunteer, index) => (
-                      <tr key={volunteer.user.id} className="h-10">
-                        <th>{index + 1}</th>
-                        <td>{volunteer.user.name}</td>
-                        <td>{volunteer.user.phone}</td>
-                        <td>{volunteer.user.email}</td>
-                        {new Date(projectInformation.startDate) < new Date() ? (
-                          <td>{getVolunteerRole(volunteer.role.id)}</td>
-                        ) : (
-                          <td>
-                            <select
-                              className={`w-30 select select-xs focus:outline-none ${
-                                (volunteer.role.id === 2 && "text-sky-800") ||
-                                (volunteer.role.id === 3 && "text-warning") ||
-                                (volunteer.role.id === 4 && "text-primary")
-                              }`}
-                              value={volunteer.role.id || "0"}
-                              onChange={(e) =>
-                                handleUpdateVolunteerRole(
-                                  e.target.value,
-                                  volunteer.user.id
-                                )
-                              }
-                            >
-                              <option value="1">Unassigned</option>
-                              <option value="2">Committee</option>
-                              <option value="3">Facilitator</option>
-                              <option value="4">Participant</option>
-                            </select>
-                          </td>
-                        )}
-                        {new Date(projectInformation.startDate) < new Date() ? (
-                          <td>{getVolunteerStatus(volunteer.status.id)}</td>
-                        ) : (
-                          <td>
-                            <select
-                              className={`w-30 select select-xs focus:outline-none ${
-                                (volunteer.status.id === 1 && "text-warning") ||
-                                (volunteer.status.id === 2 && "text-primary") ||
-                                (volunteer.status.id === 3 && "text-error")
-                              }`}
-                              value={volunteer.status.id}
-                              onChange={(e) =>
-                                handleUpdateVolunteerStatus(
-                                  e.target.value,
-                                  volunteer.user.id
-                                )
-                              }
-                            >
-                              <option value="1">Pending</option>
-                              <option value="2">Confirmed</option>
-                              <option value="3">Rejected</option>
-                            </select>
-                          </td>
-                        )}
-                      </tr>
-                    )
-                  )
-                ) : (
-                  <tr className="h-10">
-                    <th></th>
-                    <td colSpan="3" className="text-primary font-medium">
-                      There are currently no volunteers!
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </>
+        <VolunteerListTable
+          projectInformation={projectInformation}
+          setProjectInformation={setProjectInformation}
+        />
       )}
 
-      {/* General Communications Section */}
+      {/* General Communications Section - for registered volunteer & project organiser */}
       {projectInformation.communications &&
         (projectInformation.userId === userDetails.id ||
           projectInformation.registeredVolunteer.status.name ===
             "Confirmed") && (
-          <div className="flex flex-col mt-6 w-full">
-            <div className="flex items-center justify-between">
-              <p className="text-lg font-semibold">General Communications</p>
-              {userDetails.id === projectInformation.user.id && (
-                <>
-                  <button
-                    className="btn btn-neutral btn-sm font-medium text-sm normal-case md:h-10"
-                    onClick={() => window.addCommunicationsModal.showModal()}
-                    disabled={
-                      new Date(projectInformation.startDate) < new Date()
-                    }
-                  >
-                    Add
-                  </button>
-
-                  {/* Add Communications Modal */}
-                  <dialog
-                    id="addCommunicationsModal"
-                    className="modal backdrop-blur-sm"
-                  >
-                    <form method="dialog" className="modal-box bg-white">
-                      <button className="btn btn-sm btn-circle btn-ghost outline-none absolute right-2 top-2">
-                        ✕
-                      </button>
-                      <h3 className="font-bold text-lg">
-                        Adding New Communications
-                      </h3>
-                      <p className="pt-1 text-sm">
-                        <span className="font-semibold">
-                          {projectInformation.title}
-                        </span>
-                      </p>
-                      <div className="mt-4">
-                        <label className="label-text font-medium">Title</label>
-                        <input
-                          type="text"
-                          placeholder="Title of Communication"
-                          className="input font-normal text-xs mt-1 w-full"
-                          value={communicationTitle}
-                          onChange={(e) =>
-                            setCommunicationTitle(e.target.value)
-                          }
-                        />
-                      </div>
-                      <div className="mt-4">
-                        <label className="label-text font-medium">Body </label>
-                        <textarea
-                          className="textarea resize-none font-normal text-xs my-1 w-full"
-                          placeholder="General information, instructions, or other news to share to the volunteers!"
-                          value={communicationBody}
-                          rows={4}
-                          onChange={(e) => setCommunicationBody(e.target.value)}
-                        ></textarea>
-                      </div>
-
-                      <button
-                        className="btn btn-primary font-medium text-sm normal-case w-full mt-2"
-                        onClick={handleAddCommunication}
-                      >
-                        Send Communication
-                      </button>
-                    </form>
-                    <form method="dialog" className="modal-backdrop">
-                      <button>close</button>
-                    </form>
-                  </dialog>
-                </>
-              )}
-            </div>
-            <div className="overflow-auto h-96 mt-2 rounded-xl shadow-xl">
-              <table className="table table-xs rounded-xl table-pin-rows">
-                <thead className="h-10 rounded-t-xl">
-                  <tr>
-                    <th className="font-normal bg-primary text-white"></th>
-                    <th className="font-normal bg-primary text-white">Title</th>
-                    <th className="font-normal bg-primary text-white">
-                      Comments
-                    </th>
-                    <th className="font-normal bg-primary text-white">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {projectInformation.communications.communications.length >
-                  0 ? (
-                    projectInformation.communications.communications.map(
-                      (comm, index) => (
-                        <tr
-                          key={comm.id}
-                          className="h-10 hover:bg-base-100 cursor-pointer transition-all duration-300"
-                        >
-                          <th>{index + 1}</th>
-                          <td>{comm.title}</td>
-                          <td>{/* //TODO: dynamic */}3</td>
-                          <td>{formatCommDate(comm.createdAt)}</td>
-                        </tr>
-                      )
-                    )
-                  ) : (
-                    <tr className="h-10">
-                      <th></th>
-                      <td colSpan="3" className="text-primary font-medium">
-                        There are currently no communications!
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <GeneralCommsTable
+            userDetails={userDetails}
+            projectInformation={projectInformation}
+            setProjectInformation={setProjectInformation}
+          />
         )}
     </div>
   );
