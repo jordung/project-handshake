@@ -3,7 +3,6 @@ import error from "../assets/error/error.svg";
 
 function Error() {
   const navigate = useNavigate();
-  // TODO: Fix responsive screen size
   return (
     <div className="flex flex-col px-8 pt-8 pb-0 text-center min-h-screen justify-start items-center prose md:min-w-full md:overflow-hidden md:justify-center md:pt-72">
       <div className="fixed bottom-0 -z-10 md:top-0">

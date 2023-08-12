@@ -37,7 +37,7 @@ function Landing() {
           </p>
           <div className="flex gap-4">
             <button
-              className="btn btn-primary text-white normal-case"
+              className="btn btn-primary text-white normal-case font-medium"
               onClick={() =>
                 loginWithRedirect({
                   authorizationParams: { screen_hint: "signup" },
@@ -46,7 +46,9 @@ function Landing() {
             >
               Join us now
             </button>
-            <button className="btn btn-neutral normal-case">Talk to us</button>
+            <button className="btn btn-neutral normal-case font-medium">
+              Talk to us
+            </button>
           </div>
           <div className="flex justify-center md:justify-start">
             <div>

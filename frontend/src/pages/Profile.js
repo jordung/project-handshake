@@ -6,7 +6,6 @@ import axios from "axios";
 import OrganiserProfile from "../components/OrganiserProfile";
 
 function Profile() {
-  // TODO: organiser profile
   // TODO: update UI once the rest of the information confirmed
   const { isAuthenticated, loginWithRedirect, user } = useAuth0();
   const [pageLoading, setPageLoading] = useState(true);
@@ -49,13 +48,24 @@ function Profile() {
 
   // return VolunteerProfile if userDetail.usertypeId === 1
   if (userDetails && userDetails.usertypeId === 1) {
-    return <VolunteerProfile userDetails={userDetails} />;
+    return (
+      <VolunteerProfile
+        userDetails={userDetails}
+        setUserDetails={setUserDetails}
+      />
+    );
   } else if (
+    // else if userDetail.usertypeId === 2 or 3, return OrganiserProfile
     userDetails &&
     (userDetails.usertypeId === 2 || userDetails.usertypeId === 3)
   ) {
-    return <OrganiserProfile userDetails={userDetails} />;
-  } // else if userDetail.usertypeId === 2 or 3, return OrganiserProfile
+    return (
+      <OrganiserProfile
+        userDetails={userDetails}
+        setUserDetails={setUserDetails}
+      />
+    );
+  }
 }
 
 export default Profile;

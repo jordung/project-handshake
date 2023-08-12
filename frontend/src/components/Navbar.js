@@ -9,20 +9,11 @@ import axios from "axios";
 
 function Navbar() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { query } = useKBar();
   const [pageLoading, setPageLoading] = useState(true);
   const [userDetails, setUserDetails] = useState(null);
 
   const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
-
-  // useEffect(() => {
-  //   if (isAuthenticated || location.pathname === "/") {
-  //     setTimeout(() => {
-  //       setPageLoading(false);
-  //     }, 1000);
-  //   }
-  // }, [isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -64,8 +55,8 @@ function Navbar() {
     <div>
       <div className="navbar fixed bg-white z-10">
         <div className="navbar-start">
-          <div className="dropdown">
-            <label tabIndex={0} className="btn btn-ghost lg:hidden">
+          <div className="dropdown" tabIndex={0}>
+            <label tabIndex={0} className="btn btn-ghost xl:hidden">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -106,11 +97,20 @@ function Navbar() {
                 </li>
               ) : (
                 <>
+                  {userDetails && userDetails.usertypeId !== 1 && (
+                    <li>
+                      <button className="lg:hidden">
+                        <p onClick={() => navigate("/createProject")}>
+                          Create New Project
+                        </p>
+                      </button>
+                    </li>
+                  )}
                   <li onClick={() => navigate("/profile")}>
                     <div>
                       <img
                         className="h-5 w-5 object-cover rounded-full"
-                        src={user.picture}
+                        src={userDetails && userDetails.profileUrl}
                         alt="profile"
                       />
                       Profile
@@ -121,17 +121,17 @@ function Navbar() {
             </ul>
           </div>
 
-          <div className="hidden lg:flex">
+          <div className="hidden xl:flex">
             {/* desktop view of quicklinks */}
             <ul className="menu menu-horizontal px-1 font-medium gap-4">
               <button
-                className="hidden btn btn-ghost btn-sm normal-case lg:h-10 lg:inline-flex"
+                className="hidden btn btn-ghost btn-sm normal-case xl:h-10 xl:inline-flex"
                 onClick={() => navigate("/projects")}
               >
                 <p className="text-sm font-medium">Projects</p>
               </button>
               <button
-                className="hidden btn btn-ghost btn-sm normal-case lg:h-10 lg:inline-flex"
+                className="hidden btn btn-ghost btn-sm normal-case xl:h-10 xl:inline-flex"
                 onClick={() => navigate("/organisers")}
               >
                 <p className="text-sm font-medium">Organisers</p>
@@ -164,7 +164,7 @@ function Navbar() {
               )}
 
               <button
-                className="hidden btn btn-ghost btn-sm normal-case lg:h-10 lg:inline-flex"
+                className="hidden btn btn-ghost btn-sm normal-case xl:h-10 xl:inline-flex"
                 onClick={query.toggle}
               >
                 <div className="flex gap-[0.1rem]">
@@ -174,11 +174,11 @@ function Navbar() {
               </button>
 
               <button
-                className="hidden btn btn-ghost btn-sm normal-case lg:h-10 lg:inline-flex"
+                className="hidden btn btn-ghost btn-sm normal-case xl:h-10 xl:inline-flex"
                 onClick={() => navigate("/profile")}
               >
                 <img
-                  className="h-6 w-6 rounded-full"
+                  className="h-6 w-6 rounded-full object-cover"
                   src={userDetails && userDetails.profileUrl}
                   alt="display"
                 />
@@ -197,13 +197,13 @@ function Navbar() {
           ) : (
             <>
               <button
-                className="btn btn-ghost btn-sm normal-case hidden lg:inline-block md:h-10"
+                className="btn btn-ghost btn-sm normal-case hidden font-medium lg:inline-block md:h-10"
                 onClick={() => loginWithRedirect()}
               >
                 Log in
               </button>
               <button
-                className="btn btn-neutral btn-sm normal-case md:h-10"
+                className="btn btn-neutral btn-sm normal-case font-medium text-sm md:h-10"
                 onClick={() =>
                   loginWithRedirect({
                     authorizationParams: { screen_hint: "signup" },
