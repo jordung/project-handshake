@@ -74,12 +74,23 @@ function ViewCommsModal({ activeComm }) {
                 alt=""
               />
               <div className="pl-4">
-                <p className="text-sm text-neutral font-semibold">John Doe</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-neutral font-semibold">John Doe</p>
+                  <BsDot className="text-base-300" />
+                  <p className="text-xs text-neutral">22 Jul 2023</p>
+                </div>
                 <p className="text-xs text-neutral">
+                  Can I check if slippers are allowed? Can I check if slippers
+                  are allowed? Can I check if slippers are allowed? Can I check
+                  if slippers are allowed? Can I check if slippers are allowed?
+                  Can I check if slippers are allowed? Can I check if slippers
+                  are allowed? Can I check if slippers are allowed? Can I check
+                  if slippers are allowed? Can I check if slippers are allowed?
                   Can I check if slippers are allowed?
                 </p>
               </div>
             </div>
+            {/* Start of Comment Card */}
             <div className="flex items-start mx-2 my-1 py-1">
               <img
                 className="h-8 w-8 object-cover rounded-full flex-shrink-0 mt-1"
@@ -87,8 +98,42 @@ function ViewCommsModal({ activeComm }) {
                 alt=""
               />
               <div className="pl-4">
-                <p className="text-sm text-neutral font-semibold">John Doe</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-neutral font-semibold">John Doe</p>
+                  <BsDot className="text-base-300" />
+                  <p className="text-xs text-neutral">22 Jul 2023</p>
+                </div>
                 <p className="text-xs text-neutral">
+                  Can I check if slippers are allowed? Can I check if slippers
+                  are allowed? Can I check if slippers are allowed? Can I check
+                  if slippers are allowed? Can I check if slippers are allowed?
+                  Can I check if slippers are allowed? Can I check if slippers
+                  are allowed? Can I check if slippers are allowed? Can I check
+                  if slippers are allowed? Can I check if slippers are allowed?
+                  Can I check if slippers are allowed?
+                </p>
+              </div>
+            </div>
+            {/* End of Comment Card */}
+            <div className="flex items-start mx-2 my-1 py-1">
+              <img
+                className="h-8 w-8 object-cover rounded-full flex-shrink-0 mt-1"
+                src={sampleProfilePic}
+                alt=""
+              />
+              <div className="pl-4">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-neutral font-semibold">John Doe</p>
+                  <BsDot className="text-base-300" />
+                  <p className="text-xs text-neutral">22 Jul 2023</p>
+                </div>
+                <p className="text-xs text-neutral">
+                  Can I check if slippers are allowed? Can I check if slippers
+                  are allowed? Can I check if slippers are allowed? Can I check
+                  if slippers are allowed? Can I check if slippers are allowed?
+                  Can I check if slippers are allowed? Can I check if slippers
+                  are allowed? Can I check if slippers are allowed? Can I check
+                  if slippers are allowed? Can I check if slippers are allowed?
                   Can I check if slippers are allowed?
                 </p>
               </div>

@@ -121,6 +121,13 @@ function SetProfile() {
                   phoneNumber: phoneNumber,
                   profilePicture: url,
                   email: user.email,
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer + ${localStorage.getItem(
+                      "accessToken"
+                    )}`,
+                  },
                 }
               );
               console.log(response);
@@ -152,6 +159,11 @@ function SetProfile() {
             phoneNumber: phoneNumber,
             profilePicture: profilePicture,
             email: user.email,
+          },
+          {
+            headers: {
+              Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+            },
           }
         );
         console.log(response);
