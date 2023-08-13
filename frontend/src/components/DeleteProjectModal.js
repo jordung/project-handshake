@@ -7,7 +7,12 @@ function DeleteProjectModal({ projectInformation }) {
   const handleDeleteProject = async () => {
     // console.log("Deleting project");
     await axios.delete(
-      `${process.env.REACT_APP_DB_API}/projects/${projectInformation.id}`
+      `${process.env.REACT_APP_DB_API}/projects/${projectInformation.id}`,
+      {
+        headers: {
+          Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+        },
+      }
     );
     navigate("/home");
   };

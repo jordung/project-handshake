@@ -6,6 +6,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import {
   formatDateTime,
   getOrganiserTypeDisplay,
+  getVolunteerRole,
   getVolunteerStatus,
 } from "../utils/formatInformation";
 import {
@@ -113,12 +114,20 @@ function Project() {
     if (isLiked) {
       // user unlikes the post
       try {
-        await axios.delete(`${process.env.REACT_APP_DB_API}/likes`, {
-          data: {
-            userId: userDetails.id,
-            projectId: projectInformation.id,
+        await axios.delete(
+          `${process.env.REACT_APP_DB_API}/likes`,
+          {
+            data: {
+              userId: userDetails.id,
+              projectId: projectInformation.id,
+            },
           },
-        });
+          {
+            headers: {
+              Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
         setIsLiked(false);
 
         const getUpdatedLikesCount = await axios.get(
@@ -141,6 +150,11 @@ function Project() {
           {
             userId: userDetails.id,
             projectId: projectInformation.id,
+          },
+          {
+            headers: {
+              Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+            },
           }
         );
         // console.log(response);
@@ -166,10 +180,20 @@ function Project() {
     if (!isJoined) {
       try {
         await axios
-          .post(`${process.env.REACT_APP_DB_API}/register`, {
-            userId: userDetails.id,
-            projectId: projectInformation.id,
-          })
+          .post(
+            `${process.env.REACT_APP_DB_API}/register`,
+            {
+              userId: userDetails.id,
+              projectId: projectInformation.id,
+            },
+            {
+              headers: {
+                Authorization: `Bearer + ${localStorage.getItem(
+                  "accessToken"
+                )}`,
+              },
+            }
+          )
           .then(async () => {
             setIsJoined(true);
             const getUpdatedRegisteredCount = await axios.get(
@@ -458,13 +482,45 @@ function Project() {
         <div className="my-4 w-full">
           <div className="flex flex-col">
             <p className="text-lg font-semibold">Volunteer Information</p>
-            <div className="flex gap-8 mt-1 items-center">
-              <p className="text-sm">Status</p>
-              <span className="badge badge-accent uppercase py-3 text-xs font-semibold text-neutral">
-                {getVolunteerStatus(
-                  projectInformation.registeredVolunteer.status.id
-                )}
-              </span>
+            <div className="flex flex-col">
+              <div className="flex gap-8 mt-1 items-center">
+                <p className="text-sm w-12">Status</p>
+                <span
+                  className={`badge uppercase py-3 text-xs font-semibold ${
+                    (projectInformation.registeredVolunteer.status.id === 1 &&
+                      "badge-warning") ||
+                    (projectInformation.registeredVolunteer.status.id === 2 &&
+                      "badge-primary") ||
+                    (projectInformation.registeredVolunteer.status.id === 3 &&
+                      "badge-error")
+                  }`}
+                >
+                  {getVolunteerStatus(
+                    projectInformation.registeredVolunteer.status.id
+                  )}
+                </span>
+              </div>
+              {projectInformation.registeredVolunteer.status.id !== 3 && (
+                <div className="flex gap-8 mt-1 items-center">
+                  <p className="text-sm w-12">Role</p>
+                  <span
+                    className={`badge uppercase py-3 text-xs font-semibold ${
+                      (projectInformation.registeredVolunteer.role.id === 1 &&
+                        "badge-neutral") ||
+                      (projectInformation.registeredVolunteer.role.id === 2 &&
+                        "badge-info") ||
+                      (projectInformation.registeredVolunteer.role.id === 3 &&
+                        "badge-info") ||
+                      (projectInformation.registeredVolunteer.role.id === 4 &&
+                        "badge-primary")
+                    }`}
+                  >
+                    {getVolunteerRole(
+                      projectInformation.registeredVolunteer.role.id
+                    )}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

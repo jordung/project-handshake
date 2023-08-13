@@ -28,12 +28,20 @@ function ProjectCard(props) {
     if (isLiked) {
       // user unlikes the post
       try {
-        await axios.delete(`${process.env.REACT_APP_DB_API}/likes`, {
-          data: {
-            userId: props.userId,
-            projectId: props.projectId,
+        await axios.delete(
+          `${process.env.REACT_APP_DB_API}/likes`,
+          {
+            data: {
+              userId: props.userId,
+              projectId: props.projectId,
+            },
           },
-        });
+          {
+            headers: {
+              Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
         // console.log(response);
         setIsLiked(false);
 
@@ -58,6 +66,11 @@ function ProjectCard(props) {
           {
             userId: props.userId,
             projectId: props.projectId,
+          },
+          {
+            headers: {
+              Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+            },
           }
         );
         // console.log(response);

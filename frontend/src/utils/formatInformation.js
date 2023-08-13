@@ -87,13 +87,13 @@ export function getVolunteerStatus(statusId) {
 
 export function getVolunteerRole(roleId) {
   switch (roleId) {
-    case 0:
-      return "Unassigned";
     case 1:
-      return "Committee";
+      return "Unassigned";
     case 2:
-      return "Facilitator";
+      return "Committee";
     case 3:
+      return "Facilitator";
+    case 4:
       return "Participant";
     default:
       return "NIL";
