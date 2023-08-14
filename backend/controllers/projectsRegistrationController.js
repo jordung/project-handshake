@@ -42,8 +42,8 @@ class ProjectsRegistrationController extends BaseController {
           const joinProject = await this.model.create({
             userId: userId,
             projectId: projectId,
-            statusId: 1,
             roleId: 1,
+            statusId: 1,
           });
 
           // returns display results for registered volunteers
@@ -57,11 +57,11 @@ class ProjectsRegistrationController extends BaseController {
                 ],
               },
               {
-                model: this.status,
+                model: this.role,
                 attributes: ["id", "name"],
               },
               {
-                model: this.role,
+                model: this.status,
                 attributes: ["id", "name"],
               },
             ],

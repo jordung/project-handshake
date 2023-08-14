@@ -34,8 +34,46 @@ class CommunicationsController extends BaseController {
     }
   }
 
-  // TODO: need to check that the organiser = project organiser
-  // TODO: Align all data fields with FE req.body
+  // only registered volunteers and project organiser can view communications
+  async getOneCommunication(req, res) {
+    const { projectId, commsId } = req.query;
+
+    try {
+      const communication = await this.model.findOne({
+        where: { projectId: projectId, id: commsId },
+        include: [
+          {
+            model: this.comment,
+            include: [
+              {
+                model: this.user,
+                attributes: ["id", "name", "profileUrl"],
+              },
+            ],
+          },
+        ],
+      });
+
+      if (!communication) {
+        return res.status(404).json({
+          error: true,
+          msg: "Error: communication not found.",
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        data: communication,
+        msg: "Success: communication retrieved successfully!",
+      });
+    } catch (error) {
+      return res.status(400).json({
+        error: true,
+        msg: "Error: unable to retrieve communication.",
+      });
+    }
+  }
+
+  // only project organiser can add new communications
   async addOneCommunication(req, res) {
     const { userId, projectId, title, description } = req.body;
 
@@ -80,10 +118,10 @@ class CommunicationsController extends BaseController {
 
   // TODO: to remind jordan to add "data: {}"
   // async deleteOneCommunication(req, res) {
-  //   const { userId, projectId, communicationId } = req.body;
+  //   const { userId, projectId, commsId } = req.body;
   //   try {
   //     const communication = await this.model.findOne({
-  //       where: { userId: userId, projectId: projectId },
+  //       where: { id: commsId, projectId: projectId },
   //     });
 
   //     const user = await this.model.findByPk(userId);

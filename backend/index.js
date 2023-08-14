@@ -13,6 +13,7 @@ const VolunteersRouter = require("./routers/volunteersRouters");
 const OrganisersRouter = require("./routers/organisersRouter");
 const PostRegistrationRouter = require("./routers/postRegistrationRouter");
 const CommunicationsRouter = require("./routers/communicationsRouter");
+const CommentsRouter = require("./routers/commentsRouter");
 
 // const UnauthenticatedUsersRouter = require("./routers/unauthenticatedUsersRouter");
 
@@ -25,6 +26,7 @@ const VolunteersController = require("./controllers/volunteersController");
 const OrganisersController = require("./controllers/organisersController");
 const PostRegistrationController = require("./controllers/postRegistrationController");
 const CommunicationsController = require("./controllers/communicationsController");
+const CommentsController = require("./controllers/commentsController");
 
 // const UnauthenticatedUsersController = require("./controllers/unauthenticatedUsersController");
 
@@ -63,6 +65,7 @@ const projectsController = new ProjectsController({
   status,
   role,
   communication,
+  comment,
 });
 
 const projectsLikedController = new ProjectsLikedController({
@@ -116,6 +119,14 @@ const communicationsController = new CommunicationsController({
   comment,
 });
 
+const commentsController = new CommentsController({
+  user,
+  project,
+  volunteer_project,
+  communication,
+  comment,
+});
+
 // const unauthenticatedUsersController = new UnauthenticatedUsersController({
 //   user,
 //   target_comm,
@@ -126,23 +137,27 @@ const communicationsController = new CommunicationsController({
 
 // TODO: Figure out where to insert 'auth'
 // inittializing Routers
-// const userRouter = new UsersRouter(usersController, auth).routes();
-const userRouter = new UsersRouter(usersController).routes();
+const userRouter = new UsersRouter(usersController, auth).routes();
 const projectRouter = new ProjectsRouter(projectsController, auth).routes();
 const projectLikedRouter = new ProjectsLikedRouter(
-  projectsLikedController
+  projectsLikedController,
+  auth
 ).routes();
 const projectRegistrationRouter = new ProjectsRegistrationRouter(
-  projectsRegistrationController
+  projectsRegistrationController,
+  auth
 ).routes();
 const volunteerRouter = new VolunteersRouter(volunteersController).routes();
 const organiserRouter = new OrganisersRouter(organisersController).routes();
 const postRegistrationRouter = new PostRegistrationRouter(
-  postRegistrationController
+  postRegistrationController,
+  auth
 ).routes();
 const communicationRouter = new CommunicationsRouter(
-  communicationsController
+  communicationsController,
+  auth
 ).routes();
+const commentRouter = new CommentsRouter(commentsController, auth).routes();
 
 // const unauthenticatedUserRouter = new UnauthenticatedUsersRouter(
 //   unauthenticatedUsersController
@@ -166,6 +181,7 @@ app.use("/admin", postRegistrationRouter);
 app.use("/volunteers", volunteerRouter);
 app.use("/organisers", organiserRouter);
 app.use("/communications", communicationRouter);
+app.use("/comments", commentRouter);
 
 // route for all unauthenticated users
 // app.use("/unauth", unauthenticatedUserRouter);

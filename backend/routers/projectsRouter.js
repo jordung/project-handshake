@@ -4,7 +4,7 @@ const router = express.Router();
 class ProjectsRouter {
   constructor(controller, auth) {
     this.controller = controller;
-    // this.auth = auth;
+    this.auth = auth;
   }
 
   routes() {
@@ -23,12 +23,19 @@ class ProjectsRouter {
       this.controller.getOneProject.bind(this.controller)
     );
 
-    router.post("/", this.controller.addOneProject.bind(this.controller));
+    router.post(
+      "/",
+      this.auth,
+      this.controller.addOneProject.bind(this.controller)
+    );
+
     router.put(
       "/:projectId",
+      this.auth,
       this.controller.updateOneProject.bind(this.controller)
     );
 
+    // TODO: add auth to delete!!!!
     // TODO: Pending to test delete function
     router.delete(
       "/:projectId",

@@ -1,4 +1,5 @@
 const BaseController = require("./baseController");
+const { Sequelize } = require("sequelize");
 
 class ProjectsController extends BaseController {
   constructor({
@@ -10,6 +11,7 @@ class ProjectsController extends BaseController {
     status,
     role,
     communication,
+    comment,
   }) {
     super(project);
 
@@ -21,6 +23,8 @@ class ProjectsController extends BaseController {
     this.status = status;
     this.role = role;
     this.communication = communication;
+    this.comment = comment;
+    this.Sequelize = Sequelize;
   }
 
   async getAllProjects(req, res) {
@@ -95,14 +99,28 @@ class ProjectsController extends BaseController {
         where: { projectId: projectId },
       });
 
-      const communications = await this.project.findByPk(projectId, {
+      const findCommunications = await this.project.findByPk(projectId, {
         include: [
           {
             model: this.communication,
+            include: [
+              {
+                model: this.comment,
+              },
+            ],
           },
         ],
         attributes: [],
       });
+
+      const communications = findCommunications.communications.map(
+        (communication) => {
+          const commentCount = communication.comments.length;
+          return { ...communication.toJSON(), totalComments: commentCount };
+        }
+      );
+
+      console.log("Communications with Comment Counts:", communications);
 
       // check if projects exists
       if (!project) {
@@ -132,22 +150,22 @@ class ProjectsController extends BaseController {
 
         // ===== [REGISTERED VOLUNTEERS]: display project details + registration status + comms ===== //
         if (alreadyRegistered) {
-          const registeredVolunteer = await this.volunteer_project.findByPk(
-            userId,
-            {
-              include: [
-                {
-                  model: this.status,
-                  attributes: ["id", "name"],
-                },
-                {
-                  model: this.role,
-                  attributes: ["id", "name"],
-                },
-              ],
-              attributes: [],
-            }
-          );
+          const registeredVolunteer = await this.volunteer_project.findOne({
+            where: { userId: userId, projectId: projectId },
+            include: [
+              {
+                model: this.role,
+                attributes: ["id", "name"],
+              },
+              {
+                model: this.status,
+                attributes: ["id", "name"],
+              },
+            ],
+            attributes: [],
+          });
+
+          console.log("registeredVolunteer", registeredVolunteer.toJSON());
 
           return res.status(200).json({
             success: true,
@@ -179,11 +197,11 @@ class ProjectsController extends BaseController {
                 model: this.user,
               },
               {
-                model: this.status,
+                model: this.role,
                 attributes: ["id", "name"],
               },
               {
-                model: this.role,
+                model: this.status,
                 attributes: ["id", "name"],
               },
             ],
@@ -347,11 +365,11 @@ class ProjectsController extends BaseController {
             model: this.user,
           },
           {
-            model: this.status,
+            model: this.role,
             attributes: ["id", "name"],
           },
           {
-            model: this.role,
+            model: this.status,
             attributes: ["id", "name"],
           },
         ],
