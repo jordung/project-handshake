@@ -20,6 +20,7 @@ class CommunicationsRouter {
       this.controller.addOneCommunication.bind(this.controller)
     );
 
+    // TODO: add this.auth
     router.delete(
       "/",
       this.auth,
