@@ -216,6 +216,11 @@ function Project() {
               data: {
                 userId: userDetails.id,
               },
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
             }
           )
           .then(async () => {
