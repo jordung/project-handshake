@@ -19,7 +19,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 function Organiser() {
   const navigate = useNavigate();
-  const { isLoading, user } = useAuth0();
+  const { isLoading, user, isAuthenticated } = useAuth0();
   const [pageLoading, setPageLoading] = useState(true);
   const [organiserInformation, setOrganiserInformation] = useState([]);
   const [organiserProjectInformation, setOrganiserProjectInformation] =
@@ -42,7 +42,7 @@ function Organiser() {
           setOrganiserInformation(values[0]);
           setOrganiserProjectInformation(values[1]);
           // console.log(values[1]);
-          if (values[0].email === user.email) {
+          if (isAuthenticated && values[0].email === user.email) {
             navigate("/profile");
           }
           setPageLoading(false);
@@ -100,12 +100,20 @@ function Organiser() {
               <p className="font-semibold">Website</p>
               <a
                 className="text-sm"
-                href={organiserInformation.organiser.website || null}
+                href={
+                  organiserInformation.organiser.website !== null
+                    ? organiserInformation.organiser.website.startsWith("http")
+                      ? organiserInformation.organiser.website
+                      : "http://" + organiserInformation.organiser.website
+                    : null
+                }
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
               >
                 {organiserInformation.organiser.website !== null
-                  ? organiserInformation.organiser.website
+                  ? organiserInformation.organiser.website.startsWith("http")
+                    ? organiserInformation.organiser.website
+                    : "http://" + organiserInformation.organiser.website
                   : "NIL"}
               </a>
             </div>

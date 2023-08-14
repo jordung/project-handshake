@@ -118,7 +118,7 @@ function VolunteerProfile({ userDetails, setUserDetails }) {
                 },
                 {
                   headers: {
-                    Authorization: `Bearer + ${localStorage.getItem(
+                    Authorization: `Bearer ${localStorage.getItem(
                       "accessToken"
                     )}`,
                   },
@@ -151,7 +151,7 @@ function VolunteerProfile({ userDetails, setUserDetails }) {
           },
           {
             headers: {
-              Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           }
         );

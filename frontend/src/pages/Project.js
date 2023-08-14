@@ -15,16 +15,13 @@ import {
   FaHeartCircleXmark,
   FaAngleDown,
 } from "react-icons/fa6";
-import ViewCommsModal from "../components/ViewCommsModal";
 import EditProjectModal from "../components/EditProjectModal";
 import DeleteProjectModal from "../components/DeleteProjectModal";
 import GeneralCommsTable from "../components/GeneralCommsTable";
 import VolunteerListTable from "../components/VolunteerListTable";
 
 function Project() {
-  // TODO: view communications modal
   // TODO: delete communications modal
-  // TODO: add comments, delete comments
   const { projectId } = useParams();
   const { user, isAuthenticated } = useAuth0();
   const navigate = useNavigate();
@@ -124,7 +121,7 @@ function Project() {
           },
           {
             headers: {
-              Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           }
         );
@@ -153,7 +150,7 @@ function Project() {
           },
           {
             headers: {
-              Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           }
         );
@@ -188,9 +185,7 @@ function Project() {
             },
             {
               headers: {
-                Authorization: `Bearer + ${localStorage.getItem(
-                  "accessToken"
-                )}`,
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
               },
             }
           )
@@ -537,8 +532,7 @@ function Project() {
       {/* General Communications Section - for registered volunteer & project organiser */}
       {projectInformation.communications &&
         (projectInformation.userId === userDetails.id ||
-          projectInformation.registeredVolunteer.status.name ===
-            "Confirmed") && (
+          projectInformation.registeredVolunteer.status.id === 2) && (
           <GeneralCommsTable
             userDetails={userDetails}
             projectInformation={projectInformation}

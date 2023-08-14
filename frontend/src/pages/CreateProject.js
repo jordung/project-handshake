@@ -150,6 +150,13 @@ function CreateProject() {
                 volunteersReq: volunteersRequired,
                 description: generalInfo,
                 userId: userDetails.id,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem(
+                    "accessToken"
+                  )}`,
+                },
               }
             );
             console.log(response);

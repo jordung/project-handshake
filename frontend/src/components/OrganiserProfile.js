@@ -114,7 +114,7 @@ function OrganiserProfile({ userDetails, setUserDetails }) {
                 },
                 {
                   headers: {
-                    Authorization: `Bearer + ${localStorage.getItem(
+                    Authorization: `Bearer ${localStorage.getItem(
                       "accessToken"
                     )}`,
                   },
@@ -147,7 +147,7 @@ function OrganiserProfile({ userDetails, setUserDetails }) {
           },
           {
             headers: {
-              Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           }
         );

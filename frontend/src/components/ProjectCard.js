@@ -38,7 +38,7 @@ function ProjectCard(props) {
           },
           {
             headers: {
-              Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           }
         );
@@ -69,7 +69,7 @@ function ProjectCard(props) {
           },
           {
             headers: {
-              Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           }
         );

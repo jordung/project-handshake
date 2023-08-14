@@ -6,7 +6,6 @@ import {
   getOrganiserTypeDisplay,
 } from "../utils/formatInformation";
 import { FaCanadianMapleLeaf } from "react-icons/fa6";
-import loading from "../assets/loading/loading.gif";
 
 function PreviewVolunteerModal({ previewVolunteerInfo }) {
   const [previewVolunteerInformation, setPreviewVolunteerInformation] =

@@ -26,7 +26,7 @@ function VolunteerListTable({ projectInformation, setProjectInformation }) {
       },
       {
         headers: {
-          Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       }
     );
@@ -43,7 +43,7 @@ function VolunteerListTable({ projectInformation, setProjectInformation }) {
       },
       {
         headers: {
-          Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       }
     );

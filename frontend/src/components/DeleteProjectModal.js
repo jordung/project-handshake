@@ -10,7 +10,7 @@ function DeleteProjectModal({ projectInformation }) {
       `${process.env.REACT_APP_DB_API}/projects/${projectInformation.id}`,
       {
         headers: {
-          Authorization: `Bearer + ${localStorage.getItem("accessToken")}`,
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       }
     );

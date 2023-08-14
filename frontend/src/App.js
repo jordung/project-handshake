@@ -54,7 +54,7 @@ function App() {
           scope: "read:current_user",
         },
       });
-      console.log(accessToken);
+      // console.log(accessToken);
       localStorage.setItem("accessToken", accessToken);
     };
 
