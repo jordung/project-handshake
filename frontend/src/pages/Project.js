@@ -57,16 +57,15 @@ function Project() {
             }
           );
           setProjectInformation(getProjectInformation.data.data);
-          console.log(getProjectInformation.data.data);
           setProjectLikes(getProjectInformation.data.data.likesCount);
           setIsJoined(
             getProjectInformation.data.data.registeredVolunteer !== undefined
           );
 
-          console.log(getProjectInformation.data.data);
+          // console.log(getProjectInformation.data.data);
           setPageLoading(false);
         })
-        .then(async () => {
+        .then(() => {
           // retrieve project liked information
           const getProjectLike = async () => {
             const response = await axios.get(
@@ -75,6 +74,7 @@ function Project() {
             const likedProjects = response.data.data.map(
               (item) => item.projectId
             );
+            console.log(response.data.data);
             if (likedProjects.indexOf(projectInformation.id) !== -1) {
               setIsLiked(true);
             }
@@ -111,20 +111,15 @@ function Project() {
     if (isLiked) {
       // user unlikes the post
       try {
-        await axios.delete(
-          `${process.env.REACT_APP_DB_API}/likes`,
-          {
-            data: {
-              userId: userDetails.id,
-              projectId: projectInformation.id,
-            },
+        await axios.delete(`${process.env.REACT_APP_DB_API}/likes`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
+          data: {
+            userId: userDetails.id,
+            projectId: projectInformation.id,
+          },
+        });
         setIsLiked(false);
 
         const getUpdatedLikesCount = await axios.get(
@@ -213,13 +208,11 @@ function Project() {
           .delete(
             `${process.env.REACT_APP_DB_API}/register/${projectInformation.id}`,
             {
-              data: {
-                userId: userDetails.id,
-              },
-            },
-            {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+              data: {
+                userId: userDetails.id,
               },
             }
           )
