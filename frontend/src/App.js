@@ -33,8 +33,13 @@ import Project from "./pages/Project";
 import Organiser from "./pages/Organiser";
 
 function App() {
-  const { isAuthenticated, logout, loginWithRedirect, user, isLoading } =
-    useAuth0();
+  const {
+    isAuthenticated,
+    logout,
+    loginWithRedirect,
+    getAccessTokenSilently,
+    isLoading,
+  } = useAuth0();
   const [pageLoading, setPageLoading] = useState(true);
   const [allProjectsList, setAllProjectsList] = useState([]);
   const [allOrganisersList, setAllOrganisersList] = useState([]);
@@ -42,23 +47,35 @@ function App() {
   const location = useLocation();
 
   useEffect(() => {
+    const getToken = async () => {
+      const accessToken = await getAccessTokenSilently({
+        authorizationParams: {
+          audience: process.env.REACT_APP_AUDIENCE,
+          scope: "read:current_user",
+        },
+      });
+      // console.log(accessToken);
+      localStorage.setItem("accessToken", accessToken);
+    };
+
     const getProjects = async () => {
       const projects = await axios.get(
         `${process.env.REACT_APP_DB_API}/projects`
       );
       setAllProjectsList(projects.data.data);
     };
+
     const getOrganisers = async () => {
       const organisers = await axios.get(
         `${process.env.REACT_APP_DB_API}/users/organisers`
       );
       setAllOrganisersList(organisers.data.data);
     };
-
     getProjects();
     getOrganisers();
 
     if (isAuthenticated) {
+      getToken();
       setPageLoading(false);
     } else {
       setPageLoading(false);

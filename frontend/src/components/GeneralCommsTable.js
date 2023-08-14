@@ -1,3 +1,4 @@
+import { useState } from "react";
 import AddCommsModal from "./AddCommsModal";
 import ViewCommsModal from "./ViewCommsModal";
 
@@ -6,6 +7,7 @@ function GeneralCommsTable({
   projectInformation,
   setProjectInformation,
 }) {
+  const [selectedComms, setSelectedComms] = useState(null);
   function formatCommDate(dateString) {
     const date = new Date(dateString);
     const day = date.getDate();
@@ -15,6 +17,16 @@ function GeneralCommsTable({
     const year = date.getFullYear();
     return `${day} ${month} ${year}`;
   }
+
+  const handleViewComm = (projectId, commsId) => {
+    setSelectedComms({
+      projectId: projectId,
+      commsId: commsId,
+      userId: userDetails.id,
+    });
+    window.viewCommsModal.showModal();
+  };
+
   return (
     <div className="flex flex-col mt-6 w-full">
       <div className="flex items-center justify-between">
@@ -49,21 +61,23 @@ function GeneralCommsTable({
             </tr>
           </thead>
           <tbody>
-            {projectInformation.communications.communications.length > 0 ? (
-              projectInformation.communications.communications.map(
-                (comm, index) => (
+            {projectInformation.communications.length > 0 ? (
+              projectInformation.communications
+                .sort((a, b) => a.id - b.id)
+                .map((comm, index) => (
                   <tr
                     key={comm.id}
                     className="h-10 hover:bg-base-100 cursor-pointer transition-all duration-300"
-                    onClick={() => window.viewCommsModal.showModal()}
+                    onClick={() =>
+                      handleViewComm(projectInformation.id, comm.id)
+                    }
                   >
                     <th>{index + 1}</th>
                     <td>{comm.title}</td>
-                    <td>{/* //TODO: dynamic */}3</td>
+                    <td>{comm.totalComments}</td>
                     <td>{formatCommDate(comm.createdAt)}</td>
                   </tr>
-                )
-              )
+                ))
             ) : (
               <tr className="h-10">
                 <th></th>
@@ -74,7 +88,11 @@ function GeneralCommsTable({
             )}
           </tbody>
         </table>
-        <ViewCommsModal />
+        <ViewCommsModal
+          selectedComms={selectedComms}
+          projectInformation={projectInformation}
+          setProjectInformation={setProjectInformation}
+        />
       </div>
     </div>
   );

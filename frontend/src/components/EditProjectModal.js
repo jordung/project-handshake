@@ -53,6 +53,11 @@ function EditProjectModal({ projectInformation, setProjectInformation }) {
             volunteersReq: editedVolunteersRequired,
             description: editedDescription,
             imageURL: projectInformation.image,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
           }
         )
         .then((response) => {

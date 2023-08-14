@@ -8,10 +8,7 @@ import { LiaIdCardSolid } from "react-icons/lia";
 import { useState } from "react";
 
 function VolunteerListTable({ projectInformation, setProjectInformation }) {
-  const [previewVolunteerInfo, setPreviewVolunteerInfo] = useState({
-    volunteerEmail: "",
-    volunteerId: "",
-  });
+  const [previewVolunteerInfo, setPreviewVolunteerInfo] = useState(null);
 
   const handleUpdateVolunteerRole = async (updatedRole, volunteerId) => {
     console.log({
@@ -26,6 +23,11 @@ function VolunteerListTable({ projectInformation, setProjectInformation }) {
         updatedRole: updatedRole,
         volunteerId: volunteerId,
         projectId: projectInformation.id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
       }
     );
     setProjectInformation(updatedProjectInformation.data.data);
@@ -38,6 +40,11 @@ function VolunteerListTable({ projectInformation, setProjectInformation }) {
         updatedStatus: parseInt(updatedStatus),
         volunteerId: volunteerId,
         projectId: projectInformation.id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
       }
     );
     setProjectInformation(updatedProjectInformation.data.data);
@@ -74,74 +81,77 @@ function VolunteerListTable({ projectInformation, setProjectInformation }) {
           </thead>
           <tbody>
             {projectInformation.projectVolunteers.length > 0 ? (
-              projectInformation.projectVolunteers.map((volunteer, index) => (
-                <tr key={volunteer.user.id} className="h-10">
-                  <th>{index + 1}</th>
-                  <td>{volunteer.user.name}</td>
-                  <td>{volunteer.user.phone}</td>
-                  <td>{volunteer.user.email}</td>
-                  {new Date(projectInformation.startDate) < new Date() ? (
-                    <td>{getVolunteerRole(volunteer.role.id)}</td>
-                  ) : (
+              projectInformation.projectVolunteers
+                .sort((a, b) => a.user.name.localeCompare(b.user.name))
+                .map((volunteer, index) => (
+                  <tr key={volunteer.user.id} className="h-10">
+                    <th>{index + 1}</th>
+                    <td>{volunteer.user.name}</td>
+                    <td>{volunteer.user.phone}</td>
+                    <td>{volunteer.user.email}</td>
+                    {new Date(projectInformation.startDate) < new Date() ? (
+                      <td>{getVolunteerRole(volunteer.role.id)}</td>
+                    ) : (
+                      <td>
+                        <select
+                          className={`w-30 select select-xs focus:outline-none ${
+                            (volunteer.role.id === 2 && "text-info") ||
+                            (volunteer.role.id === 3 && "text-warning") ||
+                            (volunteer.role.id === 4 && "text-primary")
+                          }`}
+                          value={volunteer.role.id || "0"}
+                          onChange={(e) =>
+                            handleUpdateVolunteerRole(
+                              e.target.value,
+                              volunteer.user.id
+                            )
+                          }
+                          disabled={volunteer.status.id === 3}
+                        >
+                          <option value="1">Unassigned</option>
+                          <option value="2">Committee</option>
+                          <option value="3">Facilitator</option>
+                          <option value="4">Participant</option>
+                        </select>
+                      </td>
+                    )}
+                    {new Date(projectInformation.startDate) < new Date() ? (
+                      <td>{getVolunteerStatus(volunteer.status.id)}</td>
+                    ) : (
+                      <td>
+                        <select
+                          className={`w-30 select select-xs focus:outline-none ${
+                            (volunteer.status.id === 1 && "text-warning") ||
+                            (volunteer.status.id === 2 && "text-primary") ||
+                            (volunteer.status.id === 3 && "text-error")
+                          }`}
+                          value={volunteer.status.id}
+                          onChange={(e) =>
+                            handleUpdateVolunteerStatus(
+                              e.target.value,
+                              volunteer.user.id
+                            )
+                          }
+                        >
+                          <option value="1">Pending</option>
+                          <option value="2">Confirmed</option>
+                          <option value="3">Rejected</option>
+                        </select>
+                      </td>
+                    )}
                     <td>
-                      <select
-                        className={`w-30 select select-xs focus:outline-none ${
-                          (volunteer.role.id === 2 && "text-sky-800") ||
-                          (volunteer.role.id === 3 && "text-warning") ||
-                          (volunteer.role.id === 4 && "text-primary")
-                        }`}
-                        value={volunteer.role.id || "0"}
-                        onChange={(e) =>
-                          handleUpdateVolunteerRole(
-                            e.target.value,
+                      <LiaIdCardSolid
+                        className="h-6 w-6 cursor-pointer text-neutral hover:text-primary transition-all duration-300"
+                        onClick={() =>
+                          handlePreviewVolunteer(
+                            volunteer.user.email,
                             volunteer.user.id
                           )
                         }
-                      >
-                        <option value="1">Unassigned</option>
-                        <option value="2">Committee</option>
-                        <option value="3">Facilitator</option>
-                        <option value="4">Participant</option>
-                      </select>
+                      />
                     </td>
-                  )}
-                  {new Date(projectInformation.startDate) < new Date() ? (
-                    <td>{getVolunteerStatus(volunteer.status.id)}</td>
-                  ) : (
-                    <td>
-                      <select
-                        className={`w-30 select select-xs focus:outline-none ${
-                          (volunteer.status.id === 1 && "text-warning") ||
-                          (volunteer.status.id === 2 && "text-primary") ||
-                          (volunteer.status.id === 3 && "text-error")
-                        }`}
-                        value={volunteer.status.id}
-                        onChange={(e) =>
-                          handleUpdateVolunteerStatus(
-                            e.target.value,
-                            volunteer.user.id
-                          )
-                        }
-                      >
-                        <option value="1">Pending</option>
-                        <option value="2">Confirmed</option>
-                        <option value="3">Rejected</option>
-                      </select>
-                    </td>
-                  )}
-                  <td>
-                    <LiaIdCardSolid
-                      className="h-6 w-6 cursor-pointer text-neutral hover:text-primary transition-all duration-300"
-                      onClick={() =>
-                        handlePreviewVolunteer(
-                          volunteer.user.email,
-                          volunteer.user.id
-                        )
-                      }
-                    />
-                  </td>
-                </tr>
-              ))
+                  </tr>
+                ))
             ) : (
               <tr className="h-10">
                 <th></th>

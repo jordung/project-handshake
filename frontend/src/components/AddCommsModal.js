@@ -12,12 +12,20 @@ function AddCommsModal({
 
   const handleAddCommunication = async () => {
     await axios
-      .post(`${process.env.REACT_APP_DB_API}/communications`, {
-        userId: userDetails.id,
-        projectId: projectInformation.id,
-        title: communicationTitle,
-        description: communicationBody,
-      })
+      .post(
+        `${process.env.REACT_APP_DB_API}/communications`,
+        {
+          userId: userDetails.id,
+          projectId: projectInformation.id,
+          title: communicationTitle,
+          description: communicationBody,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      )
       .then(async () => {
         const updatedProjectInformation = await axios.get(
           `${process.env.REACT_APP_DB_API}/projects/${projectInformation.id}`,

@@ -1,8 +1,41 @@
-import sampleProfilePic from "../assets/pexels-photo-775358.jpeg";
+import { useEffect, useState } from "react";
 import { BsDot } from "react-icons/bs";
+import { FaRegTrashCan } from "react-icons/fa6";
+import axios from "axios";
 
-function ViewCommsModal({ activeComm }) {
-  // TODO: make this modal dynamic, grab commId from parent and call API to render comm information
+function ViewCommsModal({
+  selectedComms,
+  projectInformation,
+  setProjectInformation,
+}) {
+  const [commsInfo, setCommsInfo] = useState([]);
+  const [commentsList, setCommentsList] = useState([]);
+  const [commentText, setCommentText] = useState("");
+  useEffect(() => {
+    const getComm = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_DB_API}/communications`,
+          {
+            params: {
+              projectId: selectedComms.projectId,
+              commsId: selectedComms.commsId,
+            },
+          }
+        );
+        // console.log(response.data.data);
+        setCommsInfo(response.data.data);
+        setCommentsList(response.data.data.comments);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    if (selectedComms) {
+      getComm();
+    }
+  }, [selectedComms]);
+
   function formatCommDate(dateString) {
     const date = new Date(dateString);
     const day = date.getDate();
@@ -12,7 +45,93 @@ function ViewCommsModal({ activeComm }) {
     const year = date.getFullYear();
     return `${day} ${month} ${year}`;
   }
-  console.log(activeComm);
+
+  const handleAddComment = (e) => {
+    e.preventDefault();
+    const sendComment = async () => {
+      const updatedCommentsList = await axios.post(
+        `${process.env.REACT_APP_DB_API}/comments`,
+        {
+          userId: selectedComms.userId,
+          projectId: selectedComms.projectId,
+          commsId: selectedComms.commsId,
+          text: commentText,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+      // console.log(updatedCommentsList);
+      setCommentsList(updatedCommentsList.data.data);
+    };
+
+    const getUpdatedProjectInformation = async () => {
+      try {
+        const getProjectInformation = await axios.get(
+          `${process.env.REACT_APP_DB_API}/projects/${selectedComms.projectId}`,
+          {
+            params: {
+              userId: selectedComms.userId,
+            },
+          }
+        );
+        // console.log(getProjectInformation.data.data);
+        setProjectInformation(getProjectInformation.data.data);
+        setCommentText("");
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    sendComment().then(() => getUpdatedProjectInformation());
+  };
+
+  const handleDeleteComment = (commentId) => {
+    const deleteComment = async () => {
+      try {
+        const response = await axios.delete(
+          `${process.env.REACT_APP_DB_API}/comments`,
+          {
+            data: {
+              userId: selectedComms.userId,
+              commsId: selectedComms.commsId,
+              commentId: commentId,
+            },
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
+        // console.log(response.data.data);
+        setCommentsList(response.data.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const getUpdatedProjectInformation = async () => {
+      try {
+        const getProjectInformation = await axios.get(
+          `${process.env.REACT_APP_DB_API}/projects/${selectedComms.projectId}`,
+          {
+            params: {
+              userId: selectedComms.userId,
+            },
+          }
+        );
+        // console.log(getProjectInformation.data.data);
+        setProjectInformation(getProjectInformation.data.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    deleteComment().then(() => getUpdatedProjectInformation());
+  };
 
   return (
     <dialog id="viewCommsModal" className="modal backdrop-blur-sm not-prose">
@@ -20,79 +139,60 @@ function ViewCommsModal({ activeComm }) {
         <button className="btn btn-sm btn-circle btn-ghost outline-none absolute right-2 top-2">
           ✕
         </button>
-        <h3 className="font-bold text-lg text-left">
-          Getting to project venue
-        </h3>
-        <p className="font-semibold text-sm">22 Jul 2023</p>
-        <div className="w-full mt-1 max-h-[30vh] md:max-h-[30vh] overflow-y-scroll">
+        <h3 className="font-bold text-lg text-left">{commsInfo.title}</h3>
+        <p className="font-semibold text-sm">
+          {commsInfo.createdAt && formatCommDate(commsInfo.createdAt)}
+        </p>
+        <div className="w-full mt-1 max-h-[30vh] md:max-h-[30vh] overflow-y-auto">
           <div className="flex flex-col">
             <div className="font-normal text-sm">
-              Nearest MRT stop: Bendemeer MRT (Downtown Line) Take Exit B, and
-              follow the escalator until you see Bendemeer Market. Once you see
-              the market, take a right and you will see this huge sheltered
-              foyer area, which will be our meet-up point
-              {/* {projectInformation.description
-              .split("\n")
-              .map((paragraph, index) => (
-                <p key={index} className="text-sm mb-2">
-                  {paragraph}
-                </p>
-              ))} */}
+              {commsInfo.description &&
+                commsInfo.description.split("\n").map((paragraph, index) => (
+                  <p key={index} className="text-sm mb-2">
+                    {paragraph}
+                  </p>
+                ))}
             </div>
           </div>
         </div>
         <div>
           <h4 className="font-bold text-lg mt-4">Comments</h4>
           <div className="h-56 shadow-lg max-h-[30vh] overflow-auto rounded-xl">
-            <div className="flex items-start mx-2 my-1 py-1">
-              <img
-                className="h-8 w-8 object-cover rounded-full flex-shrink-0 mt-1"
-                src={sampleProfilePic}
-                alt=""
-              />
-              <div className="pl-4">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-neutral font-semibold">John Doe</p>
-                  <BsDot className="text-base-300" />
-                  <p className="text-xs text-neutral">22 Jul 2023</p>
-                </div>
-                <p className="text-xs text-neutral">
-                  Can I check if slippers are allowed? Can I check if slippers
-                  are allowed? Can I check if slippers are allowed? Can I check
-                  if slippers are allowed? Can I check if slippers are allowed?
-                  Can I check if slippers are allowed? Can I check if slippers
-                  are allowed? Can I check if slippers are allowed? Can I check
-                  if slippers are allowed? Can I check if slippers are allowed?
-                  Can I check if slippers are allowed?
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start mx-2 my-1 py-1">
-              <img
-                className="h-8 w-8 object-cover rounded-full flex-shrink-0 mt-1"
-                src={sampleProfilePic}
-                alt=""
-              />
-              <div className="pl-4">
-                <p className="text-sm text-neutral font-semibold">John Doe</p>
-                <p className="text-xs text-neutral">
-                  Can I check if slippers are allowed?
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start mx-2 my-1 py-1">
-              <img
-                className="h-8 w-8 object-cover rounded-full flex-shrink-0 mt-1"
-                src={sampleProfilePic}
-                alt=""
-              />
-              <div className="pl-4">
-                <p className="text-sm text-neutral font-semibold">John Doe</p>
-                <p className="text-xs text-neutral">
-                  Can I check if slippers are allowed?
-                </p>
-              </div>
-            </div>
+            {commentsList.length > 0 &&
+              commentsList
+                .sort((a, b) => a.id - b.id)
+                .map((comment) => (
+                  <div
+                    key={comment.id}
+                    className="flex justify-between items-center"
+                  >
+                    <div className="flex items-start mx-2 my-1 py-1">
+                      <img
+                        className="h-8 w-8 object-cover rounded-full flex-shrink-0 mt-1"
+                        src={comment.user.profileUrl}
+                        alt=""
+                      />
+                      <div className="pl-4">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-neutral font-semibold">
+                            {comment.user.name}
+                          </p>
+                          <BsDot className="text-base-300" />
+                          <p className="text-xs text-neutral">
+                            {formatCommDate(comment.createdAt)}
+                          </p>
+                        </div>
+                        <p className="text-xs text-neutral">{comment.text}</p>
+                      </div>
+                    </div>
+                    {comment.userId === selectedComms.userId && (
+                      <FaRegTrashCan
+                        className="mx-8 text-neutral cursor-pointer hover:text-error transition-all duration-300"
+                        onClick={() => handleDeleteComment(comment.id)}
+                      />
+                    )}
+                  </div>
+                ))}
           </div>
         </div>
         <div className="bg-base-100 mt-6 rounded-xl flex items-center h-10">
@@ -100,17 +200,16 @@ function ViewCommsModal({ activeComm }) {
             type="text"
             placeholder="Type here"
             className="input text-sm input-ghost w-full focus:outline-none h-10 rounded-xl"
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
           />
-          <button className="btn btn-neutral text-sm font-medium normal-case btn-sm md:h-10">
+          <button
+            className="btn btn-neutral text-sm font-medium normal-case btn-sm md:h-10"
+            onClick={handleAddComment}
+          >
             Send
           </button>
         </div>
-        {/* <button
-          className="btn btn-primary font-medium text-sm normal-case w-full mt-4"
-          //   onClick={handleEditProfile}
-        >
-          Button
-        </button> */}
       </form>
       <form method="dialog" className="modal-backdrop">
         <button>close</button>

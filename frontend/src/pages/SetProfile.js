@@ -10,7 +10,7 @@ import { storage } from "../firebase";
 
 function SetProfile() {
   const navigate = useNavigate();
-  const { user, isLoading } = useAuth0();
+  const { user, isLoading, getAccessTokenSilently } = useAuth0();
   const [pageLoading, setPageLoading] = useState(true);
 
   // states for user input
@@ -41,6 +41,17 @@ function SetProfile() {
 
   // API call on load to get list of countries
   useEffect(() => {
+    const getToken = async () => {
+      const accessToken = await getAccessTokenSilently({
+        authorizationParams: {
+          audience: process.env.REACT_APP_AUDIENCE,
+          scope: "read:current_user",
+        },
+      });
+      console.log(accessToken);
+      localStorage.setItem("accessToken", accessToken);
+    };
+
     const getCities = async () => {
       const response = await axios.get(
         "https://countriesnow.space/api/v0.1/countries/iso"
@@ -49,6 +60,7 @@ function SetProfile() {
       setCountries(countryNames);
       setPageLoading(false);
     };
+    getToken();
     getCities();
   }, []);
 
@@ -121,6 +133,13 @@ function SetProfile() {
                   phoneNumber: phoneNumber,
                   profilePicture: url,
                   email: user.email,
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem(
+                      "accessToken"
+                    )}`,
+                  },
                 }
               );
               console.log(response);
@@ -152,6 +171,11 @@ function SetProfile() {
             phoneNumber: phoneNumber,
             profilePicture: profilePicture,
             email: user.email,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
           }
         );
         console.log(response);

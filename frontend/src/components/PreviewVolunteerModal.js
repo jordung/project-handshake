@@ -40,18 +40,20 @@ function PreviewVolunteerModal({ previewVolunteerInfo }) {
       }
     };
 
-    getPreviewVolunteerInformation();
+    if (previewVolunteerInfo) {
+      getPreviewVolunteerInformation();
+    }
   }, [previewVolunteerInfo]);
 
   return (
     <dialog id="previewVolunteerModal" className="modal backdrop-blur-sm">
-      <form method="dialog" className="modal-box bg-white">
+      <form method="dialog" className="modal-box bg-white w-1/3 max-w-2xl">
         <button className="btn btn-sm btn-circle btn-ghost outline-none absolute right-2 top-2">
           ✕
         </button>
         <h3 className="font-bold text-lg">Preview Volunteer</h3>
         <div className="flex gap-8 mt-4 justify-between items-start">
-          <div className="p-2">
+          <div className="p-2 w-5/12">
             <p className="font-semibold text-sm">Name</p>
             <p className="my-0 text-sm">{previewVolunteerInformation.name}</p>
             <p className="font-semibold text-sm mt-2">Username</p>
@@ -86,7 +88,7 @@ function PreviewVolunteerModal({ previewVolunteerInfo }) {
         <div className="mt-4 px-2">
           <p className="font-semibold text-sm mt-2">Latest Projects Joined</p>
 
-          <div className="flex flex-col items-center justify-between mt-2 max-h-[300px] overflow-y-scroll">
+          <div className="flex flex-col items-center justify-between mt-2 max-h-[200px] overflow-y-scroll">
             {latestProjects.length > 0 ? (
               latestProjects.map((project) => (
                 <ProfileProjectCard

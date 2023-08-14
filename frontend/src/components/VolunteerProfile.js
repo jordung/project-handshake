@@ -115,6 +115,13 @@ function VolunteerProfile({ userDetails, setUserDetails }) {
                   userLocation: editedUserLocation,
                   profilePicture: url,
                   targetComm: editedTargetComm,
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem(
+                      "accessToken"
+                    )}`,
+                  },
                 }
               );
               console.log(response);
@@ -141,6 +148,11 @@ function VolunteerProfile({ userDetails, setUserDetails }) {
             userLocation: editedUserLocation,
             profilePicture: userDetails.profileUrl,
             targetComm: editedTargetComm,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
           }
         );
         console.log(response);

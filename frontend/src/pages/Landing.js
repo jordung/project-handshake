@@ -46,9 +46,14 @@ function Landing() {
             >
               Join us now
             </button>
-            <button className="btn btn-neutral normal-case font-medium">
-              Talk to us
-            </button>
+            <div
+              className="tooltip tooltip-warning before:text-xs before:uppercase before:font-semibold"
+              data-tip="coming soon"
+            >
+              <button className="btn btn-neutral normal-case font-medium">
+                Talk to us
+              </button>
+            </div>
           </div>
           <div className="flex justify-center md:justify-start">
             <div>

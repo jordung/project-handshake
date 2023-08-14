@@ -111,6 +111,13 @@ function OrganiserProfile({ userDetails, setUserDetails }) {
                   userLocation: editedUserLocation,
                   profilePicture: url,
                   website: editedWebsite,
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem(
+                      "accessToken"
+                    )}`,
+                  },
                 }
               );
               console.log(response);
@@ -137,6 +144,11 @@ function OrganiserProfile({ userDetails, setUserDetails }) {
             userLocation: editedUserLocation,
             profilePicture: userDetails.profileUrl,
             website: editedWebsite,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
           }
         );
         console.log(response);
