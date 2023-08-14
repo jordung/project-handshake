@@ -57,13 +57,12 @@ function Project() {
             }
           );
           setProjectInformation(getProjectInformation.data.data);
-          console.log(getProjectInformation.data.data);
           setProjectLikes(getProjectInformation.data.data.likesCount);
           setIsJoined(
             getProjectInformation.data.data.registeredVolunteer !== undefined
           );
 
-          console.log(getProjectInformation.data.data);
+          // console.log(getProjectInformation.data.data);
           setPageLoading(false);
         })
         .then(async () => {
@@ -75,6 +74,7 @@ function Project() {
             const likedProjects = response.data.data.map(
               (item) => item.projectId
             );
+            console.log(response.data.data);
             if (likedProjects.indexOf(projectInformation.id) !== -1) {
               setIsLiked(true);
             }
