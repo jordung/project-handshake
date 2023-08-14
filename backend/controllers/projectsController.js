@@ -261,7 +261,6 @@ class ProjectsController extends BaseController {
           title: title,
           description: description,
           location: location,
-          // ? Date Format = "2023-02-02T12:00:00.000Z" --> BE to store it as `${DATE}T${TIME}.000Z` ?
           startDate: startDate,
           endDate: endDate,
           volunteersRequired: volunteersReq,

@@ -18,6 +18,12 @@ class CommunicationsController extends BaseController {
         include: [
           {
             model: this.comment,
+            include: [
+              {
+                model: this.user,
+                attributes: ["id", "name", "profileUrl"],
+              },
+            ],
           },
         ],
       });
@@ -78,6 +84,7 @@ class CommunicationsController extends BaseController {
     const { userId, projectId, title, description } = req.body;
 
     try {
+      // check if user = project organiser
       const project = await this.project.findByPk(projectId);
 
       if (project.userId === parseInt(userId)) {
@@ -93,6 +100,12 @@ class CommunicationsController extends BaseController {
           include: [
             {
               model: this.comment,
+              include: [
+                {
+                  model: this.user,
+                  attributes: ["id", "name", "profileUrl"],
+                },
+              ],
             },
           ],
         });
@@ -117,52 +130,57 @@ class CommunicationsController extends BaseController {
   }
 
   // TODO: to remind jordan to add "data: {}"
-  // async deleteOneCommunication(req, res) {
-  //   const { userId, projectId, commsId } = req.body;
-  //   try {
-  //     const communication = await this.model.findOne({
-  //       where: { id: commsId, projectId: projectId },
-  //     });
+  async deleteOneCommunication(req, res) {
+    const { userId, projectId, commsId } = req.body;
+    try {
+      // check if user = project organiser
+      const communication = await this.model.findOne({
+        where: { id: commsId, projectId: projectId },
+      });
 
-  //     const user = await this.model.findByPk(userId);
+      if (communication.userId === parseInt(userId)) {
+        // delete associated record from the 'comments' (child) table
+        await this.comment.destroy({
+          where: { communicationId: commsId },
+        });
 
-  //     // check if user exists
-  //     if (!user) {
-  //       return res.status(404).json({
-  //         error: true,
-  //         msg: "Error: user not found.",
-  //       });
-  //     }
+        // delete associated record from 'communications' (parent) table
+        await this.model.destroy({
+          where: { id: commsId, projectId: projectId },
+        });
 
-  //     console.log("user.userId", user.userId);
-  //     console.log("userId", userId);
-
-  //     if (user.userId === parseInt(userId)) {
-  //       await this.comments.destroy({
-  //         where: { communicationId: communication.id },
-  //       });
-  //       // delete associated record from the 'volunteers' (child) table
-  //       await this.model.destroy({
-  //         where: { userId: userId, projectId: projectId },
-  //       });
-  //     } else {
-  //       return res.status(400).json({
-  //         error: true,
-  //         msg: "Error: comment can only be deleted by the commenter.",
-  //       });
-  //     }
-
-  //     return res.status(200).json({
-  //       success: true,
-  //       msg: "Success: comment has been removed!",
-  //     });
-  //   } catch (error) {
-  //     return res.status(400).json({
-  //       error: true,
-  //       msg: "Error: unable to remove comment.",
-  //     });
-  //   }
-  // }
+        const result = await this.model.findAll({
+          where: { projectId: projectId },
+          include: [
+            {
+              model: this.comment,
+              include: [
+                {
+                  model: this.user,
+                  attributes: ["id", "name", "profileUrl"],
+                },
+              ],
+            },
+          ],
+        });
+        return res.status(200).json({
+          success: true,
+          data: result,
+          msg: "Success: communication and its associated comments deleted!",
+        });
+      } else {
+        return res.status(400).json({
+          error: true,
+          msg: "Error: communication can only be deleted by the project organiser.",
+        });
+      }
+    } catch (error) {
+      return res.status(400).json({
+        error: true,
+        msg: "Error: unable to delete communication.",
+      });
+    }
+  }
 }
 
 module.exports = CommunicationsController;

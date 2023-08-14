@@ -19,10 +19,13 @@ class CommunicationsRouter {
       this.auth,
       this.controller.addOneCommunication.bind(this.controller)
     );
-    // router.delete(
-    //   "/",
-    //   this.controller.deleteOneCommunication.bind(this.controller)
-    // );
+
+    // TODO: add this.auth
+    router.delete(
+      "/",
+      this.auth,
+      this.controller.deleteOneCommunication.bind(this.controller)
+    );
 
     return router;
   }

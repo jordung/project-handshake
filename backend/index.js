@@ -103,13 +103,9 @@ const organisersController = new OrganisersController({
 
 const postRegistrationController = new PostRegistrationController({
   user,
-  target_comm,
-  project,
   volunteer_project,
-  liked_project,
   status,
   role,
-  communication,
 });
 
 const communicationsController = new CommunicationsController({

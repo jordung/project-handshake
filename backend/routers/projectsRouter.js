@@ -10,14 +10,6 @@ class ProjectsRouter {
   routes() {
     router.get("/", this.controller.getAllProjects.bind(this.controller));
 
-    // TODO: to include this.auth in getOneProject
-    // * TESTING!!!!
-    // router.get(
-    //   "/:projectId",
-    //   this.auth,
-    //   this.controller.getOneProject.bind(this.controller)
-    // );
-
     router.get(
       "/:projectId",
       this.controller.getOneProject.bind(this.controller)
