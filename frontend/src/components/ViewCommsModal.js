@@ -6,11 +6,14 @@ import axios from "axios";
 function ViewCommsModal({
   selectedComms,
   projectInformation,
-  setProjectInformation,
+  userDetails,
+  setGeneralCommunications,
 }) {
   const [commsInfo, setCommsInfo] = useState([]);
   const [commentsList, setCommentsList] = useState([]);
   const [commentText, setCommentText] = useState("");
+  console.log(projectInformation);
+  console.log(userDetails);
   useEffect(() => {
     const getComm = async () => {
       try {
@@ -46,6 +49,28 @@ function ViewCommsModal({
     return `${day} ${month} ${year}`;
   }
 
+  const handleDeleteComms = async () => {
+    try {
+      const updatedCommsList = await axios.delete(
+        `${process.env.REACT_APP_DB_API}/communications`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          data: {
+            userId: selectedComms.userId,
+            commsId: selectedComms.commsId,
+            projectId: projectInformation.id,
+          },
+        }
+      );
+
+      setGeneralCommunications(updatedCommsList.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleAddComment = (e) => {
     e.preventDefault();
     const sendComment = async () => {
@@ -78,7 +103,9 @@ function ViewCommsModal({
           }
         );
         // console.log(getProjectInformation.data.data);
-        setProjectInformation(getProjectInformation.data.data);
+        setGeneralCommunications(
+          getProjectInformation.data.data.communications
+        );
         setCommentText("");
       } catch (error) {
         console.log(error);
@@ -91,7 +118,7 @@ function ViewCommsModal({
   const handleDeleteComment = (commentId) => {
     const deleteComment = async () => {
       try {
-        const response = await axios.delete(
+        const updatedCommentsList = await axios.delete(
           `${process.env.REACT_APP_DB_API}/comments`,
           {
             headers: {
@@ -104,8 +131,8 @@ function ViewCommsModal({
             },
           }
         );
-        // console.log(response.data.data);
-        setCommentsList(response.data.data);
+        // console.log(updatedCommentsList.data.data);
+        setCommentsList(updatedCommentsList.data.data);
       } catch (error) {
         console.log(error);
       }
@@ -122,7 +149,9 @@ function ViewCommsModal({
           }
         );
         // console.log(getProjectInformation.data.data);
-        setProjectInformation(getProjectInformation.data.data);
+        setGeneralCommunications(
+          getProjectInformation.data.data.communications
+        );
       } catch (error) {
         console.log(error);
       }
@@ -137,21 +166,37 @@ function ViewCommsModal({
         <button className="btn btn-sm btn-circle btn-ghost outline-none absolute right-2 top-2">
           ✕
         </button>
-        <h3 className="font-bold text-lg text-left">{commsInfo.title}</h3>
-        <p className="font-semibold text-sm">
-          {commsInfo.createdAt && formatCommDate(commsInfo.createdAt)}
-        </p>
-        <div className="w-full mt-1 max-h-[30vh] md:max-h-[30vh] overflow-y-auto">
-          <div className="flex flex-col">
-            <div className="font-normal text-sm">
-              {commsInfo.description &&
-                commsInfo.description.split("\n").map((paragraph, index) => (
-                  <p key={index} className="text-sm mb-2">
-                    {paragraph}
-                  </p>
-                ))}
+        <div className="flex flex-col">
+          <div>
+            <h3 className="font-bold text-lg text-left">{commsInfo.title}</h3>
+            <p className="font-semibold text-sm">
+              {commsInfo.createdAt && formatCommDate(commsInfo.createdAt)}
+            </p>
+            <div className="w-full mt-1 max-h-[30vh] md:max-h-[30vh] overflow-y-auto">
+              <div className="flex flex-col">
+                <div className="font-normal text-sm">
+                  {commsInfo.description &&
+                    commsInfo.description
+                      .split("\n")
+                      .map((paragraph, index) => (
+                        <p key={index} className="text-sm mb-2">
+                          {paragraph}
+                        </p>
+                      ))}
+                </div>
+              </div>
             </div>
           </div>
+          {projectInformation.userId === userDetails.id && (
+            <div className="flex-shrink-0">
+              <button
+                className="btn btn-error text-xs font-medium normal-case btn-sm md:h-10"
+                onClick={handleDeleteComms}
+              >
+                Delete Communication
+              </button>
+            </div>
+          )}
         </div>
         <div>
           <h4 className="font-bold text-lg mt-4">Comments</h4>
@@ -171,21 +216,22 @@ function ViewCommsModal({
                         alt=""
                       />
                       <div className="pl-4">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm text-neutral font-semibold">
+                        <div className="flex flex-col items-start md:flex-row md:gap-2">
+                          <p className="text-xs text-neutral font-semibold">
                             {comment.user.name}
                           </p>
                           <BsDot className="text-base-300" />
-                          <p className="text-xs text-neutral">
+                          <p className="text-xs text-neutral italic">
                             {formatCommDate(comment.createdAt)}
                           </p>
                         </div>
                         <p className="text-xs text-neutral">{comment.text}</p>
                       </div>
                     </div>
-                    {comment.userId === selectedComms.userId && (
+                    {(comment.userId === selectedComms.userId ||
+                      projectInformation.userId === userDetails.id) && (
                       <FaRegTrashCan
-                        className="mx-8 text-neutral cursor-pointer hover:text-error transition-all duration-300"
+                        className="mx-6 text-neutral cursor-pointer hover:text-error transition-all duration-300"
                         onClick={() => handleDeleteComment(comment.id)}
                       />
                     )}

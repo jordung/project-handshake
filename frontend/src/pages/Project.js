@@ -33,6 +33,8 @@ function Project() {
   const [projectLikes, setProjectLikes] = useState();
   const [isJoined, setIsJoined] = useState(false);
   const [updatedRegisteredCount, setUpdatedRegisteredCount] = useState(null);
+  const [volunteerInformation, setVolunteerInformation] = useState([]);
+  const [generalCommunications, setGeneralCommunications] = useState([]);
 
   useEffect(() => {
     const getAuthorisedProjectInformation = async () => {
@@ -57,6 +59,12 @@ function Project() {
             }
           );
           setProjectInformation(getProjectInformation.data.data);
+          setVolunteerInformation(
+            getProjectInformation.data.data.projectVolunteers
+          );
+          setGeneralCommunications(
+            getProjectInformation.data.data.communications
+          );
           setProjectLikes(getProjectInformation.data.data.likesCount);
           setIsJoined(
             getProjectInformation.data.data.registeredVolunteer !== undefined
@@ -503,7 +511,7 @@ function Project() {
                       (projectInformation.registeredVolunteer.role.id === 2 &&
                         "badge-info") ||
                       (projectInformation.registeredVolunteer.role.id === 3 &&
-                        "badge-info") ||
+                        "badge-warning") ||
                       (projectInformation.registeredVolunteer.role.id === 4 &&
                         "badge-primary")
                     }`}
@@ -520,21 +528,23 @@ function Project() {
       )}
 
       {/* Volunteer List Section - for project organiser */}
-      {projectInformation.projectVolunteers && (
+      {volunteerInformation && (
         <VolunteerListTable
           projectInformation={projectInformation}
-          setProjectInformation={setProjectInformation}
+          volunteerInformation={volunteerInformation}
+          setVolunteerInformation={setVolunteerInformation}
         />
       )}
 
       {/* General Communications Section - for registered volunteer & project organiser */}
-      {projectInformation.communications &&
+      {generalCommunications &&
         (projectInformation.userId === userDetails.id ||
           projectInformation.registeredVolunteer.status.id === 2) && (
           <GeneralCommsTable
             userDetails={userDetails}
             projectInformation={projectInformation}
-            setProjectInformation={setProjectInformation}
+            generalCommunications={generalCommunications}
+            setGeneralCommunications={setGeneralCommunications}
           />
         )}
     </div>

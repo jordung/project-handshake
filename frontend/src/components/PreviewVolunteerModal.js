@@ -47,7 +47,10 @@ function PreviewVolunteerModal({ previewVolunteerInfo }) {
 
   return (
     <dialog id="previewVolunteerModal" className="modal backdrop-blur-sm">
-      <form method="dialog" className="modal-box bg-white w-1/3 max-w-2xl">
+      <form
+        method="dialog"
+        className="modal-box bg-white md:w-1/2 xl:w-1/3 max-w-2xl"
+      >
         <button className="btn btn-sm btn-circle btn-ghost outline-none absolute right-2 top-2">
           ✕
         </button>
@@ -70,7 +73,7 @@ function PreviewVolunteerModal({ previewVolunteerInfo }) {
             </p>
           </div>
           <img
-            className="h-48 w-48 object-cover rounded-full shadow-xl mr-auto"
+            className="h-24 w-24 flex-shrink-0 md:h-48 md:w-48 object-cover rounded-full shadow-xl"
             src={previewVolunteerInformation.profileUrl}
             alt="profile"
           />
