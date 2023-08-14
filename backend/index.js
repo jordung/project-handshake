@@ -15,8 +15,6 @@ const PostRegistrationRouter = require("./routers/postRegistrationRouter");
 const CommunicationsRouter = require("./routers/communicationsRouter");
 const CommentsRouter = require("./routers/commentsRouter");
 
-// const UnauthenticatedUsersRouter = require("./routers/unauthenticatedUsersRouter");
-
 // importing Controllers
 const UsersController = require("./controllers/usersController");
 const ProjectsController = require("./controllers/projectsController");
@@ -27,8 +25,6 @@ const OrganisersController = require("./controllers/organisersController");
 const PostRegistrationController = require("./controllers/postRegistrationController");
 const CommunicationsController = require("./controllers/communicationsController");
 const CommentsController = require("./controllers/commentsController");
-
-// const UnauthenticatedUsersController = require("./controllers/unauthenticatedUsersController");
 
 // importing DB
 const db = require("./db/models/index");
@@ -123,15 +119,6 @@ const commentsController = new CommentsController({
   comment,
 });
 
-// const unauthenticatedUsersController = new UnauthenticatedUsersController({
-//   user,
-//   target_comm,
-//   project,
-//   volunteer_project,
-//   liked_project,
-// });
-
-// TODO: Figure out where to insert 'auth'
 // inittializing Routers
 const userRouter = new UsersRouter(usersController, auth).routes();
 const projectRouter = new ProjectsRouter(projectsController, auth).routes();
@@ -155,10 +142,6 @@ const communicationRouter = new CommunicationsRouter(
 ).routes();
 const commentRouter = new CommentsRouter(commentsController, auth).routes();
 
-// const unauthenticatedUserRouter = new UnauthenticatedUsersRouter(
-//   unauthenticatedUsersController
-// ).routes();
-
 const PORT = process.env.PORT;
 const app = express();
 
@@ -178,9 +161,6 @@ app.use("/volunteers", volunteerRouter);
 app.use("/organisers", organiserRouter);
 app.use("/communications", communicationRouter);
 app.use("/comments", commentRouter);
-
-// route for all unauthenticated users
-// app.use("/unauth", unauthenticatedUserRouter);
 
 app.listen(PORT, () => {
   console.log(`Express app listening on port ${PORT}!`);

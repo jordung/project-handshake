@@ -1,5 +1,5 @@
 const BaseController = require("./baseController");
-const { Sequelize } = require("sequelize");
+const { Op } = require("sequelize");
 
 class ProjectsController extends BaseController {
   constructor({
@@ -24,7 +24,6 @@ class ProjectsController extends BaseController {
     this.role = role;
     this.communication = communication;
     this.comment = comment;
-    this.Sequelize = Sequelize;
   }
 
   async getAllProjects(req, res) {
@@ -328,7 +327,6 @@ class ProjectsController extends BaseController {
           title: title,
           description: description,
           location: location,
-          // ? Date Format = "2023-02-02T12:00:00.000Z" --> BE to store it as `${DATE}T${TIME}.000Z` ?
           startDate: startDate,
           endDate: endDate,
           volunteersRequired: volunteersReq,
@@ -403,6 +401,7 @@ class ProjectsController extends BaseController {
     }
   }
 
+  // associated tables --> liked projects, volunteer projects, communications, comments
   // TODO: Test this after POST method for saved list is up!
   async deleteOneProject(req, res) {
     const { projectId } = req.params;
@@ -418,12 +417,28 @@ class ProjectsController extends BaseController {
         });
       }
 
-      // ? add communication and comments too
-      await this.volunteer_project.destroy({
+      const allProjectCommunications = await this.communication.findAll({
+        where: { projectId: projectId },
+        attributes: ["id"],
+      });
+
+      // extract communication ids from the result
+      const communicationIds = allProjectCommunications.map((comm) => comm.id);
+      console.log("communicationIds", communicationIds);
+
+      await this.comment.destroy({
+        where: { communicationId: { [Op.in]: communicationIds } },
+      });
+
+      await this.communication.destroy({
         where: { projectId: projectId },
       });
 
       await this.liked_project.destroy({
+        where: { projectId: projectId },
+      });
+
+      await this.volunteer_project.destroy({
         where: { projectId: projectId },
       });
 
@@ -445,129 +460,3 @@ class ProjectsController extends BaseController {
 }
 
 module.exports = ProjectsController;
-
-// async getOneProject(req, res) {
-//   const { projectId } = req.params;
-//   const userId = req.query.userId;
-//   try {
-//     // for all users: can view project details.
-//     const project = await this.model.findByPk(projectId, {
-//       include: [
-//         {
-//           model: this.target_comm,
-//           attributes: ["name"],
-//         },
-//         {
-//           model: this.user,
-//         },
-//       ],
-//     });
-
-//     const volunteersCount = await this.volunteer_project.count({
-//       where: { projectId: projectId },
-//     });
-
-//     // count the total number of likes the project has received
-//     const likesCount = await this.liked_project.count({
-//       where: { projectId: projectId },
-//     });
-
-//     if (!project) {
-//       return res.status(404).json({
-//         error: true,
-//         msg: "Error: project not found.",
-//       });
-//     }
-
-//     const user = await this.user.findByPk(userId);
-
-//     // check if user is a volunteer
-//     if (user.usertypeId === 1) {
-//       // check if volunteer has already registered for the project
-//       const alreadyRegistered = await this.volunteer_project.findOne({
-//         where: { userId: userId, projectId: projectId },
-//       });
-
-//       // for registered volunteers: display project details + registration status.
-//       if (alreadyRegistered) {
-//         const registeredVolunteer = await this.volunteer_project.findByPk(
-//           userId,
-//           {
-//             include: [
-//               {
-//                 model: this.status,
-//                 attributes: ["name"],
-//               },
-//             ],
-//             attributes: [],
-//           }
-//         );
-
-//         const communications = await this.project.findByPk(projectId, {
-//           include: [
-//             {
-//               model: this.communication,
-//             },
-//           ],
-//           attributes: [],
-//         });
-
-//         return res.status(200).json({
-//           success: true,
-//           data: {
-//             ...project.toJSON(),
-//             likesCount,
-//             volunteersCount,
-//             registeredVolunteer,
-//             communications,
-//           },
-//           msg: "Success: retrieved details of the registered volunteer!",
-//         });
-//       } else {
-//         // for unregistered volunteers: display project details only.
-//         return res.status(200).json({
-//           success: true,
-//           data: { ...project.toJSON(), likesCount, volunteersCount },
-//           msg: "Success: volunteer is not registered for this project!",
-//         });
-//       }
-//       // if usertype != 1, user = organiser
-//     } else {
-//       // TODO: to include communications for organisers.
-//       // for organisers: display project details + registered volunteers.
-//       const projectVolunteers = await this.volunteer_project.findAll({
-//         where: { projectId: projectId },
-//         include: [
-//           {
-//             model: this.user,
-//           },
-//           {
-//             model: this.status,
-//             attributes: ["name"],
-//           },
-//           {
-//             model: this.role,
-//             attributes: ["name"],
-//           },
-//         ],
-//         attributes: [],
-//       });
-
-//       return res.status(200).json({
-//         success: true,
-//         data: {
-//           ...project.toJSON(),
-//           likesCount,
-//           volunteersCount,
-//           projectVolunteers,
-//         },
-//         msg: "Success: retrieved information of all registered volunteers, including registration statuses and project roles.",
-//       });
-//     }
-//   } catch {
-//     return res.status(400).json({
-//       error: true,
-//       msg: "Error: unable to retrieve project data.",
-//     });
-//   }
-// }

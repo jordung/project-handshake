@@ -39,9 +39,3 @@ class ProjectsRouter {
 }
 
 module.exports = ProjectsRouter;
-
-// // Add a separate method for unauthenticated users
-// getUnauthenticatedProject(req, res, next) {
-//   // Skip authentication for unauthenticated users
-//   return next();
-// }

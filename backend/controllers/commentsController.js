@@ -86,14 +86,6 @@ class CommentsController extends BaseController {
   async deleteOneComment(req, res) {
     const { userId, commentId, commsId } = req.body;
     try {
-      // [pending] to be removed:
-      // const comment = await this.model.findOne({
-      //   where: { userId: userId, id: commentId },
-      // });
-
-      // console.log("comment.userId", comment.userId);
-      // console.log("userId", userId);
-
       await this.model.destroy({
         where: { userId: userId, id: commentId },
       });

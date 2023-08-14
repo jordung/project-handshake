@@ -69,7 +69,7 @@ class CommunicationsController extends BaseController {
       return res.status(200).json({
         success: true,
         data: communication,
-        msg: "Success: communication retrieved successfully!",
+        msg: "Success: communication retrieved!",
       });
     } catch (error) {
       return res.status(400).json({
@@ -166,7 +166,7 @@ class CommunicationsController extends BaseController {
         return res.status(200).json({
           success: true,
           data: result,
-          msg: "Success: communication and its associated comments deleted!",
+          msg: "Success: deleted communication and its associated comments!",
         });
       } else {
         return res.status(400).json({
