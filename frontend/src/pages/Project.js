@@ -111,20 +111,15 @@ function Project() {
     if (isLiked) {
       // user unlikes the post
       try {
-        await axios.delete(
-          `${process.env.REACT_APP_DB_API}/likes`,
-          {
-            data: {
-              userId: userDetails.id,
-              projectId: projectInformation.id,
-            },
+        await axios.delete(`${process.env.REACT_APP_DB_API}/likes`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
+          data: {
+            userId: userDetails.id,
+            projectId: projectInformation.id,
+          },
+        });
         setIsLiked(false);
 
         const getUpdatedLikesCount = await axios.get(
@@ -213,13 +208,11 @@ function Project() {
           .delete(
             `${process.env.REACT_APP_DB_API}/register/${projectInformation.id}`,
             {
-              data: {
-                userId: userDetails.id,
-              },
-            },
-            {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+              data: {
+                userId: userDetails.id,
               },
             }
           )

@@ -94,15 +94,13 @@ function ViewCommsModal({
         const response = await axios.delete(
           `${process.env.REACT_APP_DB_API}/comments`,
           {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
             data: {
               userId: selectedComms.userId,
               commsId: selectedComms.commsId,
               commentId: commentId,
-            },
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           }
         );
