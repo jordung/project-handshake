@@ -7,16 +7,14 @@ import PreviewVolunteerModal from "./PreviewVolunteerModal";
 import { LiaIdCardSolid } from "react-icons/lia";
 import { useState } from "react";
 
-function VolunteerListTable({ projectInformation, setProjectInformation }) {
+function VolunteerListTable({
+  projectInformation,
+  volunteerInformation,
+  setVolunteerInformation,
+}) {
   const [previewVolunteerInfo, setPreviewVolunteerInfo] = useState(null);
 
   const handleUpdateVolunteerRole = async (updatedRole, volunteerId) => {
-    console.log({
-      updatedRole: parseInt(updatedRole),
-      volunteerId: volunteerId,
-      projectId: projectInformation.id,
-    });
-
     const updatedProjectInformation = await axios.put(
       `${process.env.REACT_APP_DB_API}/admin`,
       {
@@ -30,7 +28,7 @@ function VolunteerListTable({ projectInformation, setProjectInformation }) {
         },
       }
     );
-    setProjectInformation(updatedProjectInformation.data.data);
+    setVolunteerInformation(updatedProjectInformation.data.data);
   };
 
   const handleUpdateVolunteerStatus = async (updatedStatus, volunteerId) => {
@@ -47,7 +45,8 @@ function VolunteerListTable({ projectInformation, setProjectInformation }) {
         },
       }
     );
-    setProjectInformation(updatedProjectInformation.data.data);
+    // console.log(updatedProjectInformation.data.data);
+    setVolunteerInformation(updatedProjectInformation.data.data);
   };
 
   const handlePreviewVolunteer = (volunteerEmail, volunteerId) => {
@@ -80,8 +79,8 @@ function VolunteerListTable({ projectInformation, setProjectInformation }) {
             </tr>
           </thead>
           <tbody>
-            {projectInformation.projectVolunteers.length > 0 ? (
-              projectInformation.projectVolunteers
+            {volunteerInformation.length > 0 ? (
+              volunteerInformation
                 .sort((a, b) => a.user.name.localeCompare(b.user.name))
                 .map((volunteer, index) => (
                   <tr key={volunteer.user.id} className="h-10">

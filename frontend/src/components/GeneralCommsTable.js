@@ -5,7 +5,8 @@ import ViewCommsModal from "./ViewCommsModal";
 function GeneralCommsTable({
   userDetails,
   projectInformation,
-  setProjectInformation,
+  generalCommunications,
+  setGeneralCommunications,
 }) {
   const [selectedComms, setSelectedComms] = useState(null);
   function formatCommDate(dateString) {
@@ -17,6 +18,8 @@ function GeneralCommsTable({
     const year = date.getFullYear();
     return `${day} ${month} ${year}`;
   }
+
+  console.log(generalCommunications);
 
   const handleViewComm = (projectId, commsId) => {
     setSelectedComms({
@@ -44,7 +47,7 @@ function GeneralCommsTable({
             {/* Add Communications Modal */}
             <AddCommsModal
               projectInformation={projectInformation}
-              setProjectInformation={setProjectInformation}
+              setGeneralCommunications={setGeneralCommunications}
               userDetails={userDetails}
             />
           </>
@@ -61,8 +64,8 @@ function GeneralCommsTable({
             </tr>
           </thead>
           <tbody>
-            {projectInformation.communications.length > 0 ? (
-              projectInformation.communications
+            {generalCommunications.length > 0 ? (
+              generalCommunications
                 .sort((a, b) => a.id - b.id)
                 .map((comm, index) => (
                   <tr
@@ -74,7 +77,7 @@ function GeneralCommsTable({
                   >
                     <th>{index + 1}</th>
                     <td>{comm.title}</td>
-                    <td>{comm.totalComments}</td>
+                    <td>{comm.comments.length}</td>
                     <td>{formatCommDate(comm.createdAt)}</td>
                   </tr>
                 ))
@@ -91,7 +94,8 @@ function GeneralCommsTable({
         <ViewCommsModal
           selectedComms={selectedComms}
           projectInformation={projectInformation}
-          setProjectInformation={setProjectInformation}
+          setGeneralCommunications={setGeneralCommunications}
+          userDetails={userDetails}
         />
       </div>
     </div>

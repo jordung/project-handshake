@@ -3,40 +3,29 @@ import { useState } from "react";
 
 function AddCommsModal({
   projectInformation,
-  setProjectInformation,
   userDetails,
+  setGeneralCommunications,
 }) {
   // state for add communications modal
   const [communicationTitle, setCommunicationTitle] = useState("");
   const [communicationBody, setCommunicationBody] = useState("");
 
   const handleAddCommunication = async () => {
-    await axios
-      .post(
-        `${process.env.REACT_APP_DB_API}/communications`,
-        {
-          userId: userDetails.id,
-          projectId: projectInformation.id,
-          title: communicationTitle,
-          description: communicationBody,
+    const response = await axios.post(
+      `${process.env.REACT_APP_DB_API}/communications`,
+      {
+        userId: userDetails.id,
+        projectId: projectInformation.id,
+        title: communicationTitle,
+        description: communicationBody,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      )
-      .then(async () => {
-        const updatedProjectInformation = await axios.get(
-          `${process.env.REACT_APP_DB_API}/projects/${projectInformation.id}`,
-          {
-            params: {
-              userId: userDetails.id,
-            },
-          }
-        );
-        setProjectInformation(updatedProjectInformation.data.data);
-      });
+      }
+    );
+    setGeneralCommunications(response.data.data);
     setCommunicationTitle("");
     setCommunicationBody("");
   };
