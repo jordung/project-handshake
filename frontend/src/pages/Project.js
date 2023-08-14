@@ -65,7 +65,7 @@ function Project() {
           // console.log(getProjectInformation.data.data);
           setPageLoading(false);
         })
-        .then(async () => {
+        .then(() => {
           // retrieve project liked information
           const getProjectLike = async () => {
             const response = await axios.get(
