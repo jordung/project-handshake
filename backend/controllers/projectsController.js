@@ -1,6 +1,6 @@
 const BaseController = require("./baseController");
+const { Op } = require("sequelize");
 
-// TODO: change all to "liked" instead of saved
 class ProjectsController extends BaseController {
   constructor({
     user,
@@ -11,6 +11,7 @@ class ProjectsController extends BaseController {
     status,
     role,
     communication,
+    comment,
   }) {
     super(project);
 
@@ -22,6 +23,7 @@ class ProjectsController extends BaseController {
     this.status = status;
     this.role = role;
     this.communication = communication;
+    this.comment = comment;
   }
 
   async getAllProjects(req, res) {
@@ -39,8 +41,8 @@ class ProjectsController extends BaseController {
         ],
       });
 
+      // count the total number of likes the project has received
       const totalCount = projects.map(async (project) => {
-        // count the total number of likes the project has received.
         const likes = await this.liked_project.count({
           where: { projectId: project.id },
         });
@@ -71,15 +73,11 @@ class ProjectsController extends BaseController {
     }
   }
 
-  // * unregistered volunteers --> can join project
-  // * registered volunteers --> display registration status
-  // * organiser = organiser.id --> display list of volunteers
-
   async getOneProject(req, res) {
     const { projectId } = req.params;
     const userId = req.query.userId;
     try {
-      // for all users: can view project details.
+      // ===== [ALL USERS]: display project details ===== //
       const project = await this.model.findByPk(projectId, {
         include: [
           {
@@ -96,15 +94,46 @@ class ProjectsController extends BaseController {
         where: { projectId: projectId },
       });
 
-      // count the total number of likes the project has received
       const likesCount = await this.liked_project.count({
         where: { projectId: projectId },
       });
 
+      const findCommunications = await this.project.findByPk(projectId, {
+        include: [
+          {
+            model: this.communication,
+            include: [
+              {
+                model: this.comment,
+              },
+            ],
+          },
+        ],
+        attributes: [],
+      });
+
+      // count the total number of comments tied to each communication
+      const communications = findCommunications.communications.map(
+        (communication) => {
+          const commentCount = communication.comments.length;
+          return { ...communication.toJSON(), totalComments: commentCount };
+        }
+      );
+
+      // check if projects exists
       if (!project) {
         return res.status(404).json({
           error: true,
           msg: "Error: project not found.",
+        });
+      }
+
+      // check if userId exists, if no = user is unauthenticated
+      if (!userId) {
+        return res.status(200).json({
+          success: true,
+          data: { ...project.toJSON(), likesCount, volunteersCount },
+          msg: "Success: volunteer is not registered for this project!",
         });
       }
 
@@ -117,25 +146,18 @@ class ProjectsController extends BaseController {
           where: { userId: userId, projectId: projectId },
         });
 
-        // for registered volunteers: display project details + registration status.
+        // ===== [REGISTERED VOLUNTEERS]: display project details + registration status + comms ===== //
         if (alreadyRegistered) {
-          const registeredVolunteer = await this.volunteer_project.findByPk(
-            userId,
-            {
-              include: [
-                {
-                  model: this.status,
-                  attributes: ["name"],
-                },
-              ],
-              attributes: [],
-            }
-          );
-
-          const communications = await this.project.findByPk(projectId, {
+          const registeredVolunteer = await this.volunteer_project.findOne({
+            where: { userId: userId, projectId: projectId },
             include: [
               {
-                model: this.communication,
+                model: this.role,
+                attributes: ["id", "name"],
+              },
+              {
+                model: this.status,
+                attributes: ["id", "name"],
               },
             ],
             attributes: [],
@@ -153,44 +175,54 @@ class ProjectsController extends BaseController {
             msg: "Success: retrieved details of the registered volunteer!",
           });
         } else {
-          // for unregistered volunteers: display project details only.
+          // ===== [UNREGISTERED VOLUNTEERS]: display project details ===== //
           return res.status(200).json({
             success: true,
             data: { ...project.toJSON(), likesCount, volunteersCount },
             msg: "Success: volunteer is not registered for this project!",
           });
         }
-        // if usertype != 1, user = organiser
       } else {
-        // for organisers: display project details + registered volunteers.
-        const projectVolunteers = await this.volunteer_project.findAll({
-          where: { projectId: projectId },
-          include: [
-            {
-              model: this.user,
-            },
-            {
-              model: this.status,
-              attributes: ["name"],
-            },
-            {
-              model: this.role,
-              attributes: ["name"],
-            },
-          ],
-          attributes: [],
-        });
+        // if usertype != 1, user = organiser; check if organiser is the project organiser
+        if (project.userId === parseInt(userId)) {
+          // ===== [PROJECT ORGANISER]: display project details + registered volunteers (statuses & roles) + comms ===== //
+          const projectVolunteers = await this.volunteer_project.findAll({
+            where: { projectId: projectId },
+            include: [
+              {
+                model: this.user,
+              },
+              {
+                model: this.role,
+                attributes: ["id", "name"],
+              },
+              {
+                model: this.status,
+                attributes: ["id", "name"],
+              },
+            ],
+            attributes: [],
+          });
 
-        return res.status(200).json({
-          success: true,
-          data: {
-            ...project.toJSON(),
-            likesCount,
-            volunteersCount,
-            projectVolunteers,
-          },
-          msg: "Success: retrieved information of all registered volunteers, including registration statuses and project roles.",
-        });
+          return res.status(200).json({
+            success: true,
+            data: {
+              ...project.toJSON(),
+              likesCount,
+              volunteersCount,
+              projectVolunteers,
+              communications,
+            },
+            msg: "Success: retrieved information of all registered volunteers, including registration statuses and project roles.",
+          });
+        } else {
+          // ===== [ALL OTHER ORGANISERS]: display project details ===== //
+          return res.status(200).json({
+            success: true,
+            data: { ...project.toJSON(), likesCount, volunteersCount },
+            msg: "Success: volunteer is not registered for this project!",
+          });
+        }
       }
     } catch {
       return res.status(400).json({
@@ -200,7 +232,6 @@ class ProjectsController extends BaseController {
     }
   }
 
-  // TODO: Align all data fields with FE req.body
   async addOneProject(req, res) {
     const {
       userId,
@@ -225,7 +256,6 @@ class ProjectsController extends BaseController {
           title: title,
           description: description,
           location: location,
-          // ? Date Format = "2023-02-02T12:00:00.000Z" --> BE to store it as `${DATE}T${TIME}.000Z` ?
           startDate: startDate,
           endDate: endDate,
           volunteersRequired: volunteersReq,
@@ -271,7 +301,6 @@ class ProjectsController extends BaseController {
     }
   }
 
-  // TODO: Align all data fields with FE req.body
   async updateOneProject(req, res) {
     const {
       userId,
@@ -287,7 +316,6 @@ class ProjectsController extends BaseController {
     const { projectId } = req.params;
 
     try {
-      // TODO: Check if FE is validating if user = organiser, otherwise, BE to validate usertype
       await this.model.update(
         {
           userId: userId,
@@ -295,7 +323,6 @@ class ProjectsController extends BaseController {
           title: title,
           description: description,
           location: location,
-          // ? Date Format = "2023-02-02T12:00:00.000Z" --> BE to store it as `${DATE}T${TIME}.000Z` ?
           startDate: startDate,
           endDate: endDate,
           volunteersRequired: volunteersReq,
@@ -307,26 +334,59 @@ class ProjectsController extends BaseController {
       const updatedProject = await this.model.findByPk(projectId, {
         include: [
           {
-            model: this.user,
-          },
-          {
             model: this.target_comm,
             attributes: ["name"],
           },
+          {
+            model: this.user,
+          },
         ],
-      });
-
-      const likesCount = await this.liked_project.count({
-        where: { projectId: projectId },
       });
 
       const volunteersCount = await this.volunteer_project.count({
         where: { projectId: projectId },
       });
 
+      const likesCount = await this.liked_project.count({
+        where: { projectId: projectId },
+      });
+
+      const projectVolunteers = await this.volunteer_project.findAll({
+        where: { projectId: projectId },
+        include: [
+          {
+            model: this.user,
+          },
+          {
+            model: this.role,
+            attributes: ["id", "name"],
+          },
+          {
+            model: this.status,
+            attributes: ["id", "name"],
+          },
+        ],
+        attributes: [],
+      });
+
+      const communications = await this.project.findByPk(projectId, {
+        include: [
+          {
+            model: this.communication,
+          },
+        ],
+        attributes: [],
+      });
+
       return res.status(200).json({
         success: true,
-        data: { ...updatedProject.toJSON(), likesCount, volunteersCount },
+        data: {
+          ...updatedProject.toJSON(),
+          likesCount,
+          volunteersCount,
+          projectVolunteers,
+          communications,
+        },
         msg: "Success: project data updated!",
       });
     } catch {
@@ -337,7 +397,7 @@ class ProjectsController extends BaseController {
     }
   }
 
-  // TODO: Test this after POST method for saved list is up!
+  // This API removes a project from handshake, including all associated records in other tables!
   async deleteOneProject(req, res) {
     const { projectId } = req.params;
 
@@ -352,12 +412,29 @@ class ProjectsController extends BaseController {
         });
       }
 
-      // ?
-      await this.volunteer_project.destroy({
+      // retrieve the list of communications tied to the project id
+      const allProjectCommunications = await this.communication.findAll({
+        where: { projectId: projectId },
+        attributes: ["id"],
+      });
+
+      // extract communication ids from the result
+      const communicationIds = allProjectCommunications.map((comm) => comm.id);
+
+      // use [Op.in] to remove multiple values
+      await this.comment.destroy({
+        where: { communicationId: { [Op.in]: communicationIds } },
+      });
+
+      await this.communication.destroy({
         where: { projectId: projectId },
       });
 
       await this.liked_project.destroy({
+        where: { projectId: projectId },
+      });
+
+      await this.volunteer_project.destroy({
         where: { projectId: projectId },
       });
 

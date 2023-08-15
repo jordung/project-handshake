@@ -7,8 +7,12 @@ class VolunteersRouter {
   }
   routes() {
     router.get(
+      "/",
+      this.controller.getAllVolunteersProjects.bind(this.controller)
+    );
+    router.get(
       "/:userId",
-      this.controller.getVolunteerProjects.bind(this.controller)
+      this.controller.getProjectsTimeline.bind(this.controller)
     );
 
     return router;
