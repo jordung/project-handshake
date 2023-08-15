@@ -136,7 +136,7 @@ function CreateProject() {
     uploadBytes(storageRefInstance, projectPictureFile).then((snapshot) => {
       getDownloadURL(storageRefInstance, projectPictureFile.name).then(
         async (url) => {
-          console.log(url);
+          // console.log(url);
           try {
             const response = await axios.post(
               `${process.env.REACT_APP_DB_API}/projects`,
@@ -159,7 +159,7 @@ function CreateProject() {
                 },
               }
             );
-            console.log(response);
+            // console.log(response);
             setProjectPictureFile(null);
             setTargetCommunity("");
             setProjectTitle("");

@@ -56,7 +56,6 @@ function App() {
       });
       // console.log(accessToken);
       localStorage.setItem("accessToken", accessToken);
-      console.log(accessToken);
     };
 
     const getProjects = async () => {
