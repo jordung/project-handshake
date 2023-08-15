@@ -27,10 +27,9 @@ class ProjectsRouter {
       this.controller.updateOneProject.bind(this.controller)
     );
 
-    // TODO: add auth to delete!!!!
-    // TODO: Pending to test delete function
     router.delete(
       "/:projectId",
+      this.auth,
       this.controller.deleteOneProject.bind(this.controller)
     );
 

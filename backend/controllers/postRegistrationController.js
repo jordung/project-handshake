@@ -10,6 +10,7 @@ class PostRegistrationController extends BaseController {
     this.role = role;
   }
 
+  // This API allows the project organiser (admin) to update the volunteer's registration status and/or assign the volunteer a role.
   async updateVolunteerRegistration(req, res) {
     const { projectId, updatedStatus, updatedRole, volunteerId } = req.body;
 

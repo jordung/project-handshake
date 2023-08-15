@@ -21,7 +21,6 @@ class ProjectsRegistrationController extends BaseController {
     this.role = role;
   }
 
-  // join project = display view for registered volunteers //
   async joinProject(req, res) {
     const { userId, projectId } = req.body;
 
@@ -46,7 +45,7 @@ class ProjectsRegistrationController extends BaseController {
             statusId: 1,
           });
 
-          // returns display results for registered volunteers
+          // upon joining the project, return the result for registered volunteers
           const projectJoined = await this.model.findByPk(joinProject.id, {
             include: [
               {
@@ -91,7 +90,6 @@ class ProjectsRegistrationController extends BaseController {
     }
   }
 
-  // withdraw from project = display view for unregistered volunteers //
   async withdrawProject(req, res) {
     const { projectId } = req.params;
     const { userId } = req.body;
@@ -115,7 +113,7 @@ class ProjectsRegistrationController extends BaseController {
             where: { userId: userId, projectId: projectId },
           });
 
-          // returns display results for unregistered volunteers
+          // returns display result for unregistered volunteers
           const project = await this.project.findByPk(projectId, {
             include: [
               { model: this.target_comm, attributes: ["name"] },

@@ -30,10 +30,9 @@ class UsersRouter {
       this.controller.getOneOrganiser.bind(this.controller)
     );
 
-    // TODO: add auth!!!
-    // TODO: UPDATE DELETE FUNCTION [WIP]
     router.delete(
       "/:userId",
+      this.auth,
       this.controller.deleteOneUser.bind(this.controller)
     );
 

@@ -12,7 +12,7 @@ class OrganisersController extends BaseController {
     this.Sequelize = Sequelize;
   }
 
-  // * API call will return volunteer's upcoming projects
+  // API to return all organiser's past & upcoming projects
   async getOrgProjectsTimeline(req, res) {
     const { userId } = req.params;
 
@@ -31,12 +31,21 @@ class OrganisersController extends BaseController {
         order: [["startDate"]],
       });
 
-      // calculate total number of projects
+      // calculate the total number of projects that organiser has
       const totalProjects = allOrganiserProjects.length;
 
-      // get current date
+      // calculate the total number of registered volunteers
+      const projectIds = allOrganiserProjects.map((project) => project.id);
+
+      const totalVolunteers = await this.volunteer_project.count({
+        where: {
+          projectId: { [this.Sequelize.Op.in]: projectIds },
+        },
+      });
+
       const currentDate = new Date();
 
+      // get all past projects
       const pastProjects = await this.model.findAll({
         where: {
           userId: userId,
@@ -87,6 +96,7 @@ class OrganisersController extends BaseController {
         order: [["startDate"]],
       });
 
+      // get all upcoming projects
       const upcomingProjects = await this.model.findAll({
         where: {
           userId: userId,
@@ -141,6 +151,7 @@ class OrganisersController extends BaseController {
         success: true,
         data: {
           totalProjects: totalProjects,
+          totalVolunteers: totalVolunteers,
           pastProjects,
           upcomingProjects,
         },
@@ -157,36 +168,3 @@ class OrganisersController extends BaseController {
 }
 
 module.exports = OrganisersController;
-
-// retrieve project_ids and the associated volunteer counts - this will return an array of all projects with registered volunteers!
-// const countAllProjectsVolunteers = await this.volunteer_project.findAll({
-//   attributes: [
-//     "project_id",
-//     [this.Sequelize.fn("COUNT", "project_id"), "volunteersCount"],
-//   ],
-//   group: ["project_id"],
-//   raw: true, // Get raw data without Sequelize model wrapping
-// });
-
-// let totalVolunteers = 0;
-
-// use optional chaining operator '.?' to access the 'volunteersCount' property of the object if it exists, else, return 0.
-// const projectStatistics = allOrganiserProjects.map(async (project) => {
-//   const volunteers =
-//     countAllProjectsVolunteers.find(
-//       (count) => count.project_id === project.id
-//     )?.volunteersCount || 0;
-
-//   totalVolunteers += parseInt(volunteers);
-
-//   // count the total number of likes the project has received
-//   const likesCount = await this.liked_project.count({
-//     where: { project_id: project.id },
-//   });
-
-//   return {
-//     projectId: project.id,
-//     volunteersCount: parseInt(volunteers),
-//     likesCount: likesCount,
-//   };
-// });

@@ -1,20 +1,37 @@
 const BaseController = require("./baseController");
 const { Op } = require("sequelize");
+const { sequelize } = require("../db/models/index");
 
 class UsersController extends BaseController {
-  constructor({ user, target_comm, volunteer, organiser }) {
+  constructor({
+    user,
+    target_comm,
+    volunteer,
+    organiser,
+    project,
+    liked_project,
+    volunteer_project,
+    communication,
+    comment,
+  }) {
     super(user);
 
     this.user = user;
     this.target_comm = target_comm;
     this.volunteer = volunteer;
     this.organiser = organiser;
+    this.project = project;
+    this.liked_project = liked_project;
+    this.volunteer_project = volunteer_project;
+    this.communication = communication;
+    this.comment = comment;
   }
 
   async getAllOrganisers(req, res) {
     try {
       const organisers = await this.model.findAll({
         where: {
+          // userType = 2 OR 3
           usertypeId: { [Op.or]: [2, 3] },
         },
         include: [
@@ -63,8 +80,7 @@ class UsersController extends BaseController {
     }
   }
 
-  // TODO: Check if this could be used to redirect users to home page upon signing in!
-  // This API call will return 'volunteers' and 'organisers' tables if usertype = 1 and 2,3 respectively.
+  // This API call will return details for either 'volunteers' or 'organisers' table based on the user's usertype.
   async getOneUser(req, res) {
     const email = req.query.email;
     try {
@@ -79,7 +95,7 @@ class UsersController extends BaseController {
         ],
       });
 
-      // check if user exists, else return error 404 & redirect them to signup/set profile page.
+      // check if user exists, else return error 404 & redirect them to signup/set profile page
       if (!user) {
         return res.status(404).json({
           error: true,
@@ -129,7 +145,6 @@ class UsersController extends BaseController {
         });
       }
 
-      // TODO: Retrieve email from Auth0!
       const newUser = await this.model.create({
         usertypeId: usertype_id,
         name: name,
@@ -165,7 +180,6 @@ class UsersController extends BaseController {
     }
   }
 
-  // TODO: Align "targetComm" data field with FE req.body
   async updateOneUser(req, res) {
     const {
       phoneNumber,
@@ -191,14 +205,14 @@ class UsersController extends BaseController {
 
       const user = await this.model.findByPk(userId);
 
-      // for volunteers, they have an additional option to update the 'target_comm' field
+      // for volunteers, they have the option to update the 'target_comm' field
       if (user.usertypeId === 1) {
         await this.volunteer.update(
           { targetCommId: targetComm },
           { where: { userId: user.id } }
         );
       } else {
-        // for organisers, they have an additional option to update the 'website' field
+        // for organisers, they have the option to update the 'website' field
         await this.organiser.update(
           { website: website },
           { where: { userId: user.id } }
@@ -222,9 +236,9 @@ class UsersController extends BaseController {
     }
   }
 
-  // TODO: Review and include all associated tables tagged to user.id!
   async deleteOneUser(req, res) {
     const { userId } = req.params;
+    const transaction = await sequelize.transaction();
     try {
       const user = await this.model.findByPk(userId);
 
@@ -237,7 +251,19 @@ class UsersController extends BaseController {
       }
 
       if (user.usertypeId === 1) {
-        // delete associated record from the 'volunteers' (child) table
+        // delete associated records from the children tables
+        await this.comment.destroy({
+          where: { userId: { [Op.in]: userId } },
+        });
+
+        await this.liked_project.destroy({
+          where: { userId: userId },
+        });
+
+        await this.volunteer_project.destroy({
+          where: { userId: userId },
+        });
+
         await this.volunteer.destroy({
           where: { userId: userId },
         });
@@ -246,7 +272,37 @@ class UsersController extends BaseController {
           where: { id: userId },
         });
       } else {
-        // delete associated record from the 'organisers' (child) table
+        // else, userType = 2 OR 3
+        // delete associated records from the children tables
+        await this.comment.destroy({
+          where: { userId: userId },
+        });
+
+        await this.communication.destroy({
+          where: { userId: userId },
+        });
+
+        // retrieved the list of IDs associated with the project organiser
+        const organiserProjects = await this.project.findAll({
+          where: { userId: userId },
+          attributes: ["id"],
+        });
+
+        const organiserProjectIds = organiserProjects.map(
+          (project) => project.id
+        );
+
+        await this.liked_project.destroy({
+          where: { projectId: organiserProjectIds },
+        });
+
+        await this.volunteer_project.destroy({
+          where: { projectId: organiserProjectIds },
+        });
+
+        await this.project.destroy({
+          where: { userId: userId },
+        });
         await this.organiser.destroy({
           where: { userId: userId },
         });
@@ -256,11 +312,13 @@ class UsersController extends BaseController {
         });
       }
 
+      await transaction.commit();
       return res.status(200).json({
         success: true,
-        msg: "Success: user has been removed from Handshake!",
+        msg: "Success: user has been removed from handshake!",
       });
     } catch (error) {
+      await transaction.rollback();
       return res.status(400).json({
         error: true,
         msg: "Error: unable to remove user.",

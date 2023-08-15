@@ -41,8 +41,8 @@ class ProjectsController extends BaseController {
         ],
       });
 
+      // count the total number of likes the project has received
       const totalCount = projects.map(async (project) => {
-        // count the total number of likes the project has received.
         const likes = await this.liked_project.count({
           where: { projectId: project.id },
         });
@@ -112,14 +112,13 @@ class ProjectsController extends BaseController {
         attributes: [],
       });
 
+      // count the total number of comments tied to each communication
       const communications = findCommunications.communications.map(
         (communication) => {
           const commentCount = communication.comments.length;
           return { ...communication.toJSON(), totalComments: commentCount };
         }
       );
-
-      console.log("Communications with Comment Counts:", communications);
 
       // check if projects exists
       if (!project) {
@@ -163,8 +162,6 @@ class ProjectsController extends BaseController {
             ],
             attributes: [],
           });
-
-          console.log("registeredVolunteer", registeredVolunteer.toJSON());
 
           return res.status(200).json({
             success: true,
@@ -235,7 +232,6 @@ class ProjectsController extends BaseController {
     }
   }
 
-  // TODO: Align all data fields with FE req.body
   async addOneProject(req, res) {
     const {
       userId,
@@ -401,8 +397,7 @@ class ProjectsController extends BaseController {
     }
   }
 
-  // associated tables --> liked projects, volunteer projects, communications, comments
-  // TODO: Test this after POST method for saved list is up!
+  // This API removes a project from handshake, including all associated records in other tables!
   async deleteOneProject(req, res) {
     const { projectId } = req.params;
 
@@ -417,6 +412,7 @@ class ProjectsController extends BaseController {
         });
       }
 
+      // retrieve the list of communications tied to the project id
       const allProjectCommunications = await this.communication.findAll({
         where: { projectId: projectId },
         attributes: ["id"],
@@ -424,8 +420,8 @@ class ProjectsController extends BaseController {
 
       // extract communication ids from the result
       const communicationIds = allProjectCommunications.map((comm) => comm.id);
-      console.log("communicationIds", communicationIds);
 
+      // use [Op.in] to remove multiple values
       await this.comment.destroy({
         where: { communicationId: { [Op.in]: communicationIds } },
       });

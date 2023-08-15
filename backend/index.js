@@ -4,7 +4,7 @@ const express = require("express");
 require("dotenv").config();
 const auth = require("./middlewares/auth");
 
-// importing Routers
+// importing routers
 const UsersRouter = require("./routers/usersRouter");
 const ProjectsRouter = require("./routers/projectsRouter");
 const ProjectsLikedRouter = require("./routers/projectsLikedRouter");
@@ -43,13 +43,18 @@ const {
   comment,
 } = db;
 
-// initializing Controllers -> note the lowercase for the first word
+// initialising controllers -> note the lowercase for the first word
 const usersController = new UsersController({
   user,
   usertype,
   target_comm,
   volunteer,
   organiser,
+  project,
+  liked_project,
+  volunteer_project,
+  communication,
+  comment,
 });
 
 const projectsController = new ProjectsController({
@@ -88,13 +93,9 @@ const volunteersController = new VolunteersController({
 
 const organisersController = new OrganisersController({
   user,
-  target_comm,
-  organiser,
   project,
   volunteer_project,
   liked_project,
-  status,
-  role,
 });
 
 const postRegistrationController = new PostRegistrationController({
@@ -119,7 +120,7 @@ const commentsController = new CommentsController({
   comment,
 });
 
-// inittializing Routers
+// initialising routers
 const userRouter = new UsersRouter(usersController, auth).routes();
 const projectRouter = new ProjectsRouter(projectsController, auth).routes();
 const projectLikedRouter = new ProjectsLikedRouter(
@@ -145,7 +146,7 @@ const commentRouter = new CommentsRouter(commentsController, auth).routes();
 const PORT = process.env.PORT;
 const app = express();
 
-// Enable CORS access to this server
+// enable CORS access to this server
 app.use(cors());
 
 app.use(express.json());

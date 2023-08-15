@@ -129,7 +129,6 @@ class CommunicationsController extends BaseController {
     }
   }
 
-  // TODO: to remind jordan to add "data: {}"
   async deleteOneCommunication(req, res) {
     const { userId, projectId, commsId } = req.body;
     try {

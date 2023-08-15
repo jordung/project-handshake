@@ -78,6 +78,7 @@ class VolunteersController extends BaseController {
         order: [["id", "DESC"]],
       });
 
+      // count the total hours clocked by the volunteer
       const hoursClocked = await this.model.findAll({
         where: { userId: userId },
         include: [{ model: this.project }],

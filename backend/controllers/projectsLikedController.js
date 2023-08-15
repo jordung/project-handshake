@@ -1,6 +1,4 @@
 const BaseController = require("./baseController");
-
-// TODO: change all to "liked" instead of saved
 class ProjectsLikedController extends BaseController {
   constructor({ user, project, liked_project }) {
     super(liked_project);
@@ -10,7 +8,7 @@ class ProjectsLikedController extends BaseController {
     this.liked_project = liked_project;
   }
 
-  // API call returns one volunteer's liked list.
+  // This API call returns a volunteer's liked list.
   async getVolunteerLikedProjects(req, res) {
     const { userId } = req.params;
     try {
@@ -58,6 +56,7 @@ class ProjectsLikedController extends BaseController {
     try {
       const user = await this.user.findByPk(userId);
 
+      // only volunteers can like projects
       if (user.usertypeId === 1) {
         // check if the project is already liked by the user
         const currentLikedList = await this.model.findOne({
