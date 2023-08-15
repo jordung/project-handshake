@@ -8,6 +8,7 @@ class ProjectsRegistrationController extends BaseController {
     volunteer_project,
     liked_project,
     status,
+    role,
   }) {
     super(volunteer_project);
 
@@ -17,9 +18,9 @@ class ProjectsRegistrationController extends BaseController {
     this.volunteer_project = volunteer_project;
     this.liked_project = liked_project;
     this.status = status;
+    this.role = role;
   }
 
-  // join project = display view for registered volunteers //
   async joinProject(req, res) {
     const { userId, projectId } = req.body;
 
@@ -40,11 +41,11 @@ class ProjectsRegistrationController extends BaseController {
           const joinProject = await this.model.create({
             userId: userId,
             projectId: projectId,
-            // initialise status to "Pending"
+            roleId: 1,
             statusId: 1,
           });
 
-          // returns display results for registered volunteers
+          // upon joining the project, return the result for registered volunteers
           const projectJoined = await this.model.findByPk(joinProject.id, {
             include: [
               {
@@ -55,8 +56,12 @@ class ProjectsRegistrationController extends BaseController {
                 ],
               },
               {
+                model: this.role,
+                attributes: ["id", "name"],
+              },
+              {
                 model: this.status,
-                attributes: ["name"],
+                attributes: ["id", "name"],
               },
             ],
           });
@@ -85,7 +90,6 @@ class ProjectsRegistrationController extends BaseController {
     }
   }
 
-  // withdraw from project = display view for unregistered volunteers //
   async withdrawProject(req, res) {
     const { projectId } = req.params;
     const { userId } = req.body;
@@ -109,7 +113,7 @@ class ProjectsRegistrationController extends BaseController {
             where: { userId: userId, projectId: projectId },
           });
 
-          // returns display results for unregistered volunteers
+          // returns display result for unregistered volunteers
           const project = await this.project.findByPk(projectId, {
             include: [
               { model: this.target_comm, attributes: ["name"] },
