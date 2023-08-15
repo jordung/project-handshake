@@ -508,8 +508,7 @@ function Project() {
       )}
 
       {/* Volunteer List Section - for project organiser */}
-      {(volunteerInformation.length > 0 ||
-        projectInformation.userId === userDetails.id) && (
+      {volunteerInformation && volunteerInformation.length > 0 && (
         <VolunteerListTable
           projectInformation={projectInformation}
           volunteerInformation={volunteerInformation}
