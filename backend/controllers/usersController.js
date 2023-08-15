@@ -253,7 +253,7 @@ class UsersController extends BaseController {
       if (user.usertypeId === 1) {
         // delete associated records from the children tables
         await this.comment.destroy({
-          where: { userId: { [Op.in]: userId } },
+          where: { userId: userId },
         });
 
         await this.liked_project.destroy({

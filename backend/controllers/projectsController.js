@@ -423,7 +423,7 @@ class ProjectsController extends BaseController {
 
       // use [Op.in] to remove multiple values
       await this.comment.destroy({
-        where: { communicationId: { [Op.in]: communicationIds } },
+        where: { communicationId: communicationIds },
       });
 
       await this.communication.destroy({
