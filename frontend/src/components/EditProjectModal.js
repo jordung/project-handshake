@@ -37,8 +37,6 @@ function EditProjectModal({ projectInformation, setProjectInformation }) {
 
   // edit project from edit project modal
   const handleEditProject = () => {
-    console.log("Editing project");
-
     const editProject = async () => {
       // send edited information to backend
       await axios
@@ -61,7 +59,6 @@ function EditProjectModal({ projectInformation, setProjectInformation }) {
           }
         )
         .then((response) => {
-          console.log(response);
           // grab new information from backend and set to current state
           setProjectInformation(response.data.data);
           setEditedTargetComm(response.data.data.targetCommId);

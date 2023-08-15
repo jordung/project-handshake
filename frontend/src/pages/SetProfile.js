@@ -48,7 +48,7 @@ function SetProfile() {
           scope: "read:current_user",
         },
       });
-      console.log(accessToken);
+      // console.log(accessToken);
       localStorage.setItem("accessToken", accessToken);
     };
 
@@ -121,7 +121,7 @@ function SetProfile() {
       uploadBytes(storageRefInstance, profilePictureFile).then((snapshot) => {
         getDownloadURL(storageRefInstance, profilePictureFile.name).then(
           async (url) => {
-            console.log(url);
+            // console.log(url);
             try {
               const response = await axios.post(
                 `${process.env.REACT_APP_DB_API}/users`,
@@ -142,7 +142,7 @@ function SetProfile() {
                   },
                 }
               );
-              console.log(response);
+              // console.log(response);
               setUserType("");
               setName("");
               setUsername("");
@@ -178,7 +178,7 @@ function SetProfile() {
             },
           }
         );
-        console.log(response);
+        // console.log(response);
         setUserType("");
         setName("");
         setUsername("");

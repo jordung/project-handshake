@@ -12,8 +12,7 @@ function ViewCommsModal({
   const [commsInfo, setCommsInfo] = useState([]);
   const [commentsList, setCommentsList] = useState([]);
   const [commentText, setCommentText] = useState("");
-  console.log(projectInformation);
-  console.log(userDetails);
+
   useEffect(() => {
     const getComm = async () => {
       try {

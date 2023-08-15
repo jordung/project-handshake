@@ -19,7 +19,7 @@ function GeneralCommsTable({
     return `${day} ${month} ${year}`;
   }
 
-  console.log(generalCommunications);
+  // console.log(generalCommunications);
 
   const handleViewComm = (projectId, commsId) => {
     setSelectedComms({

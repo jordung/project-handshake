@@ -9,6 +9,7 @@ import {
   FaRegFaceLaughWink,
   FaRegHospital,
   FaCanadianMapleLeaf,
+  FaAngleDown,
 } from "react-icons/fa6";
 import axios from "axios";
 import {
@@ -24,7 +25,7 @@ import {
 import { storage } from "../firebase";
 
 function OrganiserProfile({ userDetails, setUserDetails }) {
-  const { isLoading } = useAuth0();
+  const { isLoading, logout } = useAuth0();
   const [pageLoading, setPageLoading] = useState(true);
   const [organiserInformation, setOrganiserInformation] = useState([]);
 
@@ -101,7 +102,7 @@ function OrganiserProfile({ userDetails, setUserDetails }) {
             storageRefInstance,
             editedProfilePictureFile.name
           ).then(async (url) => {
-            console.log(url);
+            // console.log(url);
             try {
               const response = await axios.put(
                 `${process.env.REACT_APP_DB_API}/users/${userDetails.id}`,
@@ -120,7 +121,7 @@ function OrganiserProfile({ userDetails, setUserDetails }) {
                   },
                 }
               );
-              console.log(response);
+              // console.log(response);
               setUserDetails(response.data.data);
               setEditedPhoneNumber(response.data.data.phone);
               setEditedBiography(response.data.data.biography);
@@ -151,7 +152,7 @@ function OrganiserProfile({ userDetails, setUserDetails }) {
             },
           }
         );
-        console.log(response);
+        // console.log(response);
         setUserDetails(response.data.data);
         setEditedPhoneNumber(response.data.data.phone);
         setEditedBiography(response.data.data.biography);
@@ -163,6 +164,18 @@ function OrganiserProfile({ userDetails, setUserDetails }) {
         console.log(error);
       }
     }
+  };
+
+  const handleDeleteAccount = async () => {
+    await axios.delete(
+      `${process.env.REACT_APP_DB_API}/users/${userDetails.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      }
+    );
+    logout({ logoutParams: { returnTo: window.location.origin } });
   };
 
   if (pageLoading || isLoading) {
@@ -188,12 +201,33 @@ function OrganiserProfile({ userDetails, setUserDetails }) {
             <p className="my-0 font-medium text-center">
               @{userDetails.username}
             </p>
-            <button
-              className="btn btn-primary btn-sm font-medium text-sm normal-case md:h-10 mt-2"
-              onClick={() => window.editProfileModal.showModal()}
-            >
-              Edit Profile
-            </button>
+
+            <div className="dropdown w-3/4 md:w-72">
+              <summary
+                tabIndex={0}
+                className="btn mt-4 font-medium text-sm normal-case w-full md:w-72 btn-neutral"
+              >
+                User Settings
+                <span className="absolute right-5">
+                  <FaAngleDown />
+                </span>
+              </summary>
+              <ul className="shadow-lg menu mt-1 dropdown-content z-[9] bg-base-100 rounded-lg p-0 w-full">
+                <button
+                  className="btn font-medium text-sm normal-case w-full md:w-72 rounded-b-none btn-ghost text-neutral"
+                  onClick={() => window.editProfileModal.showModal()}
+                >
+                  Edit Profile
+                </button>
+                <button
+                  className="btn font-medium text-sm normal-case w-full md:w-72 rounded-t-none btn-ghost text-error outline-none"
+                  onClick={() => window.deleteUserModal.showModal()}
+                >
+                  Delete Account
+                </button>
+              </ul>
+            </div>
+
             {/* Edit Profile Modal */}
             <dialog
               id="editProfileModal"
@@ -297,6 +331,33 @@ function OrganiserProfile({ userDetails, setUserDetails }) {
                   onClick={handleResetEditProfileModal}
                 >
                   Reset Values
+                </button>
+              </form>
+              <form method="dialog" className="modal-backdrop">
+                <button>close</button>
+              </form>
+            </dialog>
+
+            {/* Delete User Modal */}
+            <dialog id="deleteUserModal" className="modal backdrop-blur-sm">
+              <form method="dialog" className="modal-box bg-white">
+                <button className="btn btn-sm btn-circle btn-ghost outline-none absolute right-2 top-2">
+                  ✕
+                </button>
+                <h3 className="font-bold text-lg">Delete Confirmation</h3>
+                <p className="py-4 text-sm">
+                  You're going to delete{" "}
+                  <span className="font-semibold">{userDetails.name}</span>.
+                </p>
+                <p className="text-sm">
+                  This will delete the project permanently. You cannot undo this
+                  action.
+                </p>
+                <button
+                  className="btn btn-error font-medium text-sm normal-case w-full mt-4"
+                  onClick={handleDeleteAccount}
+                >
+                  Yes, delete
                 </button>
               </form>
               <form method="dialog" className="modal-backdrop">
