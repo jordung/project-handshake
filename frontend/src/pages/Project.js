@@ -21,7 +21,6 @@ import GeneralCommsTable from "../components/GeneralCommsTable";
 import VolunteerListTable from "../components/VolunteerListTable";
 
 function Project() {
-  // TODO: delete communications modal
   const { projectId } = useParams();
   const { user, isAuthenticated } = useAuth0();
   const navigate = useNavigate();
@@ -58,6 +57,7 @@ function Project() {
               },
             }
           );
+
           setProjectInformation(getProjectInformation.data.data);
           setVolunteerInformation(
             getProjectInformation.data.data.projectVolunteers
@@ -70,26 +70,27 @@ function Project() {
             getProjectInformation.data.data.registeredVolunteer !== undefined
           );
 
-          // console.log(getProjectInformation.data.data);
-          setPageLoading(false);
-        })
-        .then(() => {
           // retrieve project liked information
           const getProjectLike = async () => {
             const response = await axios.get(
-              `${process.env.REACT_APP_DB_API}/likes/${userDetails.id}`
+              `${process.env.REACT_APP_DB_API}/likes/${userDetails.data.data.id}`
             );
             const likedProjects = response.data.data.map(
               (item) => item.projectId
             );
-            console.log(response.data.data);
-            if (likedProjects.indexOf(projectInformation.id) !== -1) {
+            // console.log(response.data.data);
+            if (
+              likedProjects.indexOf(getProjectInformation.data.data.id) !== -1
+            ) {
               setIsLiked(true);
             }
           };
-          if (userDetails.usertypeId === 1) {
+          if (userDetails.data.data.usertypeId === 1) {
             getProjectLike();
           }
+
+          // console.log(getProjectInformation.data.data);
+          setPageLoading(false);
         });
     };
 
@@ -251,27 +252,6 @@ function Project() {
 
   return (
     <div className="flex flex-col pt-20 px-8 w-full mb-10 md:pt-10 lg:pt-20 xl:px-40">
-      {/* <div className="text-sm breadcrumbs w-full overflow-x-hidden">
-        <ul>
-          <li>
-            <p
-              className="cursor-pointer text-xs"
-              onClick={() => navigate("/home")}
-            >
-              Home
-            </p>
-          </li>
-          <li>
-            <p
-              className="cursor-pointer text-xs"
-              onClick={() => navigate("/projects")}
-            >
-              Projects
-            </p>
-          </li>
-          <li className="text-xs">{projectInformation.title}</li>
-        </ul>
-      </div> */}
       <h6 className="text-lg font-semibold text-neutral w-full">
         Project Information
       </h6>

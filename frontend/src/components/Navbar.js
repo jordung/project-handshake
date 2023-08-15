@@ -1,5 +1,5 @@
 import logo from "../assets/logo/large-logo-black.png";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Outlet } from "react-router-dom";
 import { useKBar } from "kbar";
@@ -143,6 +143,7 @@ function Navbar() {
           <button className="btn btn-link">
             <img
               className="h-7 md:h-10 object-contain"
+              draggable="false"
               src={logo}
               alt="logo"
               onClick={() => navigate(isAuthenticated ? "/home" : "/")}
