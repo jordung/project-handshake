@@ -508,7 +508,8 @@ function Project() {
       )}
 
       {/* Volunteer List Section - for project organiser */}
-      {volunteerInformation && (
+      {(volunteerInformation.length > 0 ||
+        projectInformation.userId === userDetails.id) && (
         <VolunteerListTable
           projectInformation={projectInformation}
           volunteerInformation={volunteerInformation}
@@ -519,7 +520,8 @@ function Project() {
       {/* General Communications Section - for registered volunteer & project organiser */}
       {generalCommunications &&
         (projectInformation.userId === userDetails.id ||
-          projectInformation.registeredVolunteer.status.id === 2) && (
+          (projectInformation.registeredVolunteer &&
+            projectInformation.registeredVolunteer.status.id === 2)) && (
           <GeneralCommsTable
             userDetails={userDetails}
             projectInformation={projectInformation}
