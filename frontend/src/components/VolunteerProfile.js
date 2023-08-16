@@ -201,7 +201,7 @@ function VolunteerProfile({ userDetails, setUserDetails }) {
             />
             <h3 className="my-0">{userDetails.name}</h3>
             <p className="my-0 font-medium">@{userDetails.username}</p>
-            <div className="dropdown w-3/4 md:w-full">
+            <div className="dropdown w-1/2 lg:w-full">
               <summary
                 tabIndex={0}
                 className="btn mt-4 font-medium text-sm normal-case w-full md:w-full btn-neutral"
@@ -213,13 +213,13 @@ function VolunteerProfile({ userDetails, setUserDetails }) {
               </summary>
               <ul className="shadow-lg menu mt-1 dropdown-content z-[9] bg-base-100 rounded-lg p-0 w-full">
                 <button
-                  className="btn font-medium text-sm normal-case w-full md:w-72 rounded-b-none btn-ghost text-neutral"
+                  className="btn font-medium text-sm normal-case w-full rounded-b-none btn-ghost text-neutral"
                   onClick={() => window.editProfileModal.showModal()}
                 >
                   Edit Profile
                 </button>
                 <button
-                  className="btn font-medium text-sm normal-case w-full md:w-72 rounded-t-none btn-ghost text-error outline-none"
+                  className="btn font-medium text-sm normal-case w-full rounded-t-none btn-ghost text-error outline-none"
                   onClick={() => window.deleteUserModal.showModal()}
                 >
                   Delete Account

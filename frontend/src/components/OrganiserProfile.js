@@ -202,10 +202,10 @@ function OrganiserProfile({ userDetails, setUserDetails }) {
               @{userDetails.username}
             </p>
 
-            <div className="dropdown w-3/4 md:w-72">
+            <div className="dropdown w-1/2 lg:w-full">
               <summary
                 tabIndex={0}
-                className="btn mt-4 font-medium text-sm normal-case w-full md:w-72 btn-neutral"
+                className="btn mt-4 font-medium text-sm normal-case w-full btn-neutral"
               >
                 User Settings
                 <span className="absolute right-5">
@@ -214,13 +214,13 @@ function OrganiserProfile({ userDetails, setUserDetails }) {
               </summary>
               <ul className="shadow-lg menu mt-1 dropdown-content z-[9] bg-base-100 rounded-lg p-0 w-full">
                 <button
-                  className="btn font-medium text-sm normal-case w-full md:w-72 rounded-b-none btn-ghost text-neutral"
+                  className="btn font-medium text-sm normal-case w-full rounded-b-none btn-ghost text-neutral"
                   onClick={() => window.editProfileModal.showModal()}
                 >
                   Edit Profile
                 </button>
                 <button
-                  className="btn font-medium text-sm normal-case w-full md:w-72 rounded-t-none btn-ghost text-error outline-none"
+                  className="btn font-medium text-sm normal-case w-full rounded-t-none btn-ghost text-error outline-none"
                   onClick={() => window.deleteUserModal.showModal()}
                 >
                   Delete Account
