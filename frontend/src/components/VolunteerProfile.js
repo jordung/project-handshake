@@ -201,10 +201,10 @@ function VolunteerProfile({ userDetails, setUserDetails }) {
             />
             <h3 className="my-0">{userDetails.name}</h3>
             <p className="my-0 font-medium">@{userDetails.username}</p>
-            <div className="dropdown w-3/4 md:w-72">
+            <div className="dropdown w-3/4 md:w-full">
               <summary
                 tabIndex={0}
-                className="btn mt-4 font-medium text-sm normal-case w-full md:w-72 btn-neutral"
+                className="btn mt-4 font-medium text-sm normal-case w-full md:w-full btn-neutral"
               >
                 User Settings
                 <span className="absolute right-5">
